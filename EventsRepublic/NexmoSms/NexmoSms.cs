@@ -12,8 +12,7 @@ namespace EventsRepublic.NexmoSms
         {
             var client = new Client(creds: new Nexmo.Api.Request.Credentials
             {
-                ApiKey = "b382e0c8",
-                ApiSecret = "Uc6pk2wnrBsuWM3P"
+                
             });
             var results = client.SMS.Send(request: new SMS.SMSRequest
             {
