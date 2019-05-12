@@ -19,8 +19,7 @@ namespace EventsRepublic.Controllers
     [ServiceFilter(typeof(CustomAuthorizeFilter))]
     public class EventController : Controller
     {
-        // GET: api/Event
-        
+        // GET: api/Event       
         [HttpGet("api/getevents")]
         [AllowAnonymous]
         public async Task<IActionResult> GetEvents(decimal latitude,decimal longitude,int pageno,int pagesize,int categoryid)
