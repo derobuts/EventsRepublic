@@ -48,7 +48,7 @@ namespace EventsRepublic.Controllers
             {
                 recurrencekey = ordertobereserved.OrderDate.ToUniversalTime();
             }
-            var ordercreated= await orderRespository.CreatOrder(ordertobereserved.Eventid, Guestuserid, ordertobereserved.TicketsToReserve,ordertobereserved.Recurring,recurrencekey);
+            var ordercreated= await orderRespository.CreatOrder(ordertobereserved.Eventid, Guestuserid, ordertobereserved.TicketsToReserve,ordertobereserved.Recurring,recurrencekey,ordertobereserved.NoofTicketsInOrder);
             var chkouttoken = JsonWebToken.GetToken(payload);
             return Ok(JsonConvert.SerializeObject(new { token = chkouttoken, orderReserved = ordercreated }));
         }

@@ -39,14 +39,8 @@ namespace EventsRepublic.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> EventsNearby(decimal latitude, decimal longitude)
         {
-
-            var getEvents = new EventRespositoryv2();
-            var querystring = Request.Query;
-            latitude = decimal.Parse(querystring["latitude"]);
-            longitude = decimal.Parse(querystring["longitude"]);
-            string timezone = querystring["longitude"];
-            // var loc = JsonConvert.DeserializeObject<JsonLocation>(value.ToString());
-            var homepageEvents = await getEvents.PopularNearby(latitude, longitude);
+            var getEventsNearby = new EventRespositoryv2();
+            var homepageEvents = await getEventsNearby.PopularNearby(latitude, longitude);
             return Ok(JsonConvert.SerializeObject( homepageEvents)); 
         }
 

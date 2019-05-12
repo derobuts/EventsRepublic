@@ -183,7 +183,8 @@ namespace EventsRepublic.Repository
                     });
                     if (eventz.recurring)
                     {
-                        await AddEventRecurrencePattern(Eventid);
+                        string k = "rec";
+                        await AddEventRecurrencePattern(Eventid,k);
                     }
                     else
                     {
