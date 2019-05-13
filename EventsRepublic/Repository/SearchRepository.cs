@@ -12,15 +12,7 @@ namespace EventsRepublic.Repository
 {
     public class SearchRepository
     {
-        //add constructor overloading later to enable different serach params
-        public async Task<IEnumerable<EventSubinfo>> GetSearchQuery(string query)
-        {
-
-            var EventTaskSearch = await new EventRespositoryv2().GeteventByName(query);
-
-            return EventTaskSearch;
-
-        }       
+       
     }
     //check if ienum null or empty
     public static class IenumerableCheck

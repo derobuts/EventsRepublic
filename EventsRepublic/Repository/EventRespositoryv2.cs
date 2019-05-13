@@ -125,7 +125,7 @@ namespace EventsRepublic.Repository
             });
         }
 
-        public async Task<IEnumerable<EventSubinfo>> GeteventByName(string searchword)
+        public async Task<IEnumerable<T>> GeteventByName<T>(string searchword)
         {
             return await WithConnection(async c =>
             {
@@ -134,7 +134,7 @@ namespace EventsRepublic.Repository
                 //sqlparams.Add("@lastrecordno", lastrecordno, DbType.Int32);
                 //sqlparams.Add("@noofrowsreturn", noofrowsreturn, DbType.Int32);
                 //sqlparams.Add("@maxid", DbType.Int32, direction: ParameterDirection.Output);
-                var Events = await c.QueryAsync<EventSubinfo>("SearchEventName2"
+                var Events = await c.QueryAsync<T>("SearchEventName2"
                     , sqlparams,
                     commandType: CommandType.StoredProcedure
                     );

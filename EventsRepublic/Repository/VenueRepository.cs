@@ -67,21 +67,20 @@ namespace EventsRepublic.Repository
             }
         }
         //get event venue by name
-        public async Task<Tuple<IEnumerable<VenueSearch>,int>> GetVenueByName(string searchword, int lastrecordno, int noofrowsreturn)
+        public async Task<IEnumerable<T>> GetVenueByName<T>(string searchword, int lastrecordno, int noofrowsreturn)
        {
-            return await WithConnection(async c =>
+           return await WithConnection(async c =>
             {
                 var sqlparams = new DynamicParameters();
                 sqlparams.Add("@word", searchword, DbType.String);
                 sqlparams.Add("@lastrecordno", lastrecordno, DbType.Int32);
                 sqlparams.Add("@noofrowsreturn", noofrowsreturn, DbType.Int32);
                 sqlparams.Add("@maxid", DbType.Int32, direction: ParameterDirection.Output);
-                var venuesearch = await c.QueryAsync<VenueSearch>("SearchVenueName2"
+                var venuesearch = await c.QueryAsync<T>("SearchVenueName2"
                     , sqlparams,
                     commandType: CommandType.StoredProcedure
                     );
-                int maxid = sqlparams.Get<int>("@maxid");
-                return new Tuple<IEnumerable<VenueSearch>,int>(venuesearch,maxid);
+                return venuesearch;     
             });
         }
     }

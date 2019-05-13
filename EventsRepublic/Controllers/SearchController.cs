@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EventsRepublic.Database;
+using EventsRepublic.Models;
 using EventsRepublic.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,11 +25,21 @@ namespace EventsRepublic.Controllers
 
         // GET: api/Search/5
         [HttpGet]
-        [Route("earch")]
-        public async Task<IActionResult> Get([FromQuery]string query)
+        [Route("search")]
+        /**will add proper paging later**/
+        public async Task<IActionResult>Get([FromQuery]string query,[FromQuery]string searchtype)
         {
-            var SearchRepository = await new SearchRepository().GetSearchQuery(query);
-            return Ok(JsonConvert.SerializeObject(SearchRepository));
+            switch (searchtype)
+            {
+                case "event":
+                    return new ObjectResult(await new EventRespositoryv2().GeteventByName<EventSubinfo>(query));
+                case "venue":
+                    return new ObjectResult(await new VenueRepository().GetVenueByName<VenueSearch>(query,0,7));
+                case "performer":
+                    return new ObjectResult(await new PerformerRepository().GetPerformerbyname<Performer>(query,0,7));
+
+            }
+            return new ObjectResult("not found");
         }
         
         // POST: api/Search
