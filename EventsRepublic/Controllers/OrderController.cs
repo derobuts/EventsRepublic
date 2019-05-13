@@ -52,8 +52,6 @@ namespace EventsRepublic.Controllers
             var chkouttoken = JsonWebToken.GetToken(payload);
             return Ok(JsonConvert.SerializeObject(new { token = chkouttoken, orderReserved = ordercreated }));
         }
-
-        // PUT: api/Order/5
         //confirm payment
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]object value)
@@ -70,7 +68,4 @@ namespace EventsRepublic.Controllers
         }
     }
 
-    internal class OrderTemp
-    {
-    }
 }
