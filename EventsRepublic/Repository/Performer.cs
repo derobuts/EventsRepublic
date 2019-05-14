@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -28,9 +29,10 @@ namespace EventsRepublic.Repository
     }
     public class Performer
     {
-        public int Performer_Id { get; set; }
+        [JsonProperty("Id")]
+        public int Id { get; set; }
+        [JsonProperty("Name")]
         public string Name { get; set; }
-        public string Type { get; set; } = "performer";
 
     }
 }

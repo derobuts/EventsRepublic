@@ -17,17 +17,20 @@ namespace EventsRepublic.Models
         public DateTime enddate;
         public int venueid;
         public bool venueispresent;
-        public Recurringtype recurringtype;
-        public bool recurring; 
+        public bool hasperformers;
+        public List<Recurringpattern> recurringpatterns;
+        public int recurring; 
         public Venue venue;
         public TicketClass[] ticketClasses;
-        public List<PerformerEvent> performers;
+        public List<Performer>eventperformers;
         public string photo;
         public string description;
 
-        public class Recurringtype
+        public class Recurringpattern
         {
-            public string recurringpattern { get; set; }
+            public string recurringstring { get; set; }
+            public int intervallengthmins { get; set; }
+            public string Endtime { get; set; } 
         }
     }  
 }

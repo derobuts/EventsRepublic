@@ -75,8 +75,7 @@ namespace EventsRepublic.Repository
                 sqlparams.Add("@word", searchword, DbType.String);
                 sqlparams.Add("@lastrecordno", lastrecordno, DbType.Int32);
                 sqlparams.Add("@noofrowsreturn", noofrowsreturn, DbType.Int32);
-                sqlparams.Add("@maxid", DbType.Int32, direction: ParameterDirection.Output);
-                var venuesearch = await c.QueryAsync<T>("SearchVenueName2"
+                var venuesearch = await c.QueryAsync<T>("SearchVenueName"
                     , sqlparams,
                     commandType: CommandType.StoredProcedure
                     );

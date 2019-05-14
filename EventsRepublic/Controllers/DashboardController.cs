@@ -35,14 +35,12 @@ namespace EventsRepublic.Controllers
             //var orderTicketsaleGrouped = eventid == 0 ?  dashboardRepository.OrderTicketSalegrouped(Userinfo.UserId, startdate.ToUniversalTime(), enddate.ToUniversalTime()) : dashboardRepository.OrdeTicketSalegroupedPerEvent(Userinfo.UserId, startdate.ToUniversalTime(), enddate.ToUniversalTime(), eventid);
             var LatestOrdersTask = orderRespository.GetLatestOrders();
             // alltasks.AddRange()
-
             try
             {
                 await Task.WhenAll(LatestOrdersTask,MonthlystatsTask);
             }
             catch (Exception ex)
             {
-
                 throw;
             }          
             return JsonConvert.SerializeObject(new { monthlystats = await MonthlystatsTask,latestorders = await LatestOrdersTask});

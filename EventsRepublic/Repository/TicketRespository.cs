@@ -25,7 +25,7 @@ namespace EventsRepublic.Repository
         }
         public async Task<IEnumerable<TicketClassSubinfo>> GetEventRecurringTicketClasses(Guid eventid,DateTime recurrencekey)
         {
-            //await CheckIfRecurrenceDateExists(recurrencekey, eventid);
+            await CheckIfRecurrenceDateExists(recurrencekey, eventid);
             return await WithConnection(async c =>
             {
                 var sqlparams = new DynamicParameters();
@@ -43,8 +43,7 @@ namespace EventsRepublic.Repository
         {
             var ticketid = await WithConnection(async c =>
             {
-                int Orderid = c.Query<int>(@"select Top 1 Id from Ticket where RecurrenceKey = @eventdate", new { @eventdate = date }).FirstOrDefault();
-                return Orderid;
+                return c.Query<int>(@"select Top 1 Id from Ticket where RecurrenceKey = @eventdate", new { @eventdate = date }).FirstOrDefault();
             });
             if (ticketid <= 0)
             {
@@ -60,19 +59,60 @@ namespace EventsRepublic.Repository
                 });
             }
         }
+
+        public async Task AddTicketClass(int eventid, TicketClass ticketClass)
+        {
+            await WithConnection2(async c =>
+            {
+                var sqlparams = new DynamicParameters();
+                sqlparams.Add("@event_id", eventid, DbType.Int32);
+                sqlparams.Add("@name", ticketClass.name, DbType.String);
+                sqlparams.Add("@max_qtperodr", ticketClass.max_per_order, DbType.Int16);
+                sqlparams.Add("@price", ticketClass.amount, DbType.Decimal);
+                sqlparams.Add("@type", ticketClass.type, DbType.Int16);
+                sqlparams.Add("@tickettosell", ticketClass.ticketstosell, DbType.Int32);
+                sqlparams.Add("@minperorder", ticketClass.min_per_order, DbType.Int16);
+                sqlparams.Add("@visibility", ticketClass.visibility, DbType.Int16);
+                sqlparams.Add("@startsale", ticketClass.startsale, DbType.DateTime);
+                sqlparams.Add("@endsale", ticketClass.endsale, DbType.DateTime);
+                sqlparams.Add("@feestype", ticketClass.feestype, DbType.Int32);
+                sqlparams.Add("@netprice", ticketClass.netamount, DbType.Decimal);
+                sqlparams.Add("@feecharge", ticketClass.fees, DbType.Decimal);
+                sqlparams.Add("@additionalinfo", ticketClass.additionalinfo, DbType.String);
+                await c.ExecuteAsync("AddTicketClass", sqlparams, commandType: CommandType.StoredProcedure);
+            }
+        );
+        }
+        public async Task AddRecurringTicketClass(int eventid, TicketClass ticketClass)
+        {
+            await WithConnection2(async c =>
+            {
+                var sqlparams = new DynamicParameters();
+                sqlparams.Add("@event_id", eventid, DbType.Int32);
+                sqlparams.Add("@name", ticketClass.name, DbType.String);
+                sqlparams.Add("@max_qtperodr", ticketClass.max_per_order, DbType.Int16);
+                sqlparams.Add("@price", ticketClass.amount, DbType.Decimal);
+                sqlparams.Add("@type", ticketClass.type, DbType.Int16);
+                sqlparams.Add("@tickettosell", ticketClass.ticketstosell, DbType.Int32);
+                sqlparams.Add("@minperorder", ticketClass.min_per_order, DbType.Int16);
+                sqlparams.Add("@visibility", ticketClass.visibility, DbType.Int16);
+                sqlparams.Add("@startsale", ticketClass.startsale, DbType.DateTime);
+                sqlparams.Add("@endsale", ticketClass.endsale, DbType.DateTime);
+                sqlparams.Add("@feestype", ticketClass.feestype, DbType.Int32);
+                sqlparams.Add("@netprice", ticketClass.netamount, DbType.Decimal);
+                sqlparams.Add("@feecharge", ticketClass.fees, DbType.Decimal);
+                sqlparams.Add("@additionalinfo", ticketClass.additionalinfo, DbType.String);
+                await c.ExecuteAsync("AddRecurringTicketClass", sqlparams, commandType: CommandType.StoredProcedure);
+            }
+        );
+        }
+
         public async Task<bool> ReserveTickets(int eventid, List<TicketsToReserve> ticketsToReserve)
         {
 
             List<Task> ticketclasstasks = new List<Task>();
-            /**
-            var Ordercreated = await WithConnection(async c =>
-             {
-                 var ordercreated = c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid }, commandType: CommandType.StoredProcedure).Single();
-                 return ordercreated;
-             });**/
             var reservationKey = Guid.NewGuid();
-            var unixtime = this.UnixTimeNow();
-           
+            var unixtime = this.UnixTimeNow();          
             foreach (var item in ticketsToReserve)
             {
                 ticketclasstasks.Add(ReserveTicket(item,reservationKey,unixtime,eventid));

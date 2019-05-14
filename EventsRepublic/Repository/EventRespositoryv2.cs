@@ -134,7 +134,7 @@ namespace EventsRepublic.Repository
                 //sqlparams.Add("@lastrecordno", lastrecordno, DbType.Int32);
                 //sqlparams.Add("@noofrowsreturn", noofrowsreturn, DbType.Int32);
                 //sqlparams.Add("@maxid", DbType.Int32, direction: ParameterDirection.Output);
-                var Events = await c.QueryAsync<T>("SearchEventName2"
+                var Events = await c.QueryAsync<T>("SearchEventName"
                     , sqlparams,
                     commandType: CommandType.StoredProcedure
                     );
@@ -149,6 +149,7 @@ namespace EventsRepublic.Repository
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
+                    List<Task> tocomplete = new List<Task>();
                     List<Task> ticketclasses = new List<Task>();
                     int Eventid;
                     if (!eventz.venueispresent)
@@ -174,6 +175,7 @@ namespace EventsRepublic.Repository
                         sqlparams.Add("@venueid", eventz.venueid, DbType.Int32);
                         sqlparams.Add("Startdate", eventz.startdate,DbType.DateTime);
                         sqlparams.Add("Enddate", eventz.enddate, DbType.DateTime);
+                        sqlparams.Add("@recurring", eventz.recurring, DbType.Int32);
                         sqlparams.Add("@output", DbType.Int32, direction: ParameterDirection.Output);
                         await c.ExecuteAsync("AddEvent",
                         sqlparams,
@@ -181,21 +183,29 @@ namespace EventsRepublic.Repository
                         int eventid = sqlparams.Get<int>("@output");
                         return eventid;
                     });
-                    if (eventz.recurring)
+                    if (eventz.recurring == 1)
                     {
-                        string k = "rec";
-                        await AddEventRecurrencePattern(Eventid,k);
+                        foreach (var item in eventz.recurringpatterns)
+                        {
+                            tocomplete.Add(AddEventRecurrencePattern(Eventid, item.recurringstring, item.intervallengthmins, item.Endtime));
+                            //await AddEventRecurrencePattern(Eventid,item.recurringstring,item.intervallengthmins,item.Endtime);                           
+                        }
+                        foreach (var item in eventz.ticketClasses)
+                        {
+                           tocomplete.Add(new TicketRespository().AddRecurringTicketClass(Eventid, item));
+                          // await new TicketRespository().AddRecurringTicketClass(Eventid, item);
+                        }
                     }
                     else
                     {
                         foreach (var ticketclass in eventz.ticketClasses)
                         {
-                            await AddTicketClass2(Eventid, ticketclass);
+                            tocomplete.Add(new TicketRespository().AddTicketClass(Eventid, ticketclass));
+                          // await new TicketRespository().AddTicketClass(Eventid, ticketclass);
                         }
-                    }
+                    }                   
                     
-                    //Task.WaitAll(ticketclasses.ToArray());
-                  
+                    await Task.WhenAll(tocomplete);
                     scope.Complete();
                 }
              
@@ -209,79 +219,19 @@ namespace EventsRepublic.Repository
             }          
         }
         
-        public async Task AddEventRecurrencePattern(int eventid,string cronpattern)
+        public async Task AddEventRecurrencePattern(int eventid,string recurringstring,int intervalminutes,string endtime)
         {
             await WithConnection2(async c =>
             {
                 var sqlparams = new DynamicParameters();
-                sqlparams.Add("@event_id", eventid, DbType.Int32);
-                sqlparams.Add("@recurrencepattern",cronpattern, DbType.String);
-                sqlparams.Add("@endtime", cronpattern, DbType.Time);
-                await c.ExecuteAsync("AddRecurrencePattern", sqlparams, commandType: CommandType.StoredProcedure);
+                sqlparams.Add("@eventid", eventid, DbType.Int32);
+                sqlparams.Add("@recurrencepattern",recurringstring, DbType.String);
+                sqlparams.Add("@duration",intervalminutes, DbType.Int32);
+                sqlparams.Add("@endtime",endtime, DbType.String);
+                await c.ExecuteAsync("AddRecurrence", sqlparams, commandType: CommandType.StoredProcedure);
             });
         }
-        
-  
-        public async Task AddPerformerEvent(List<PerformerEvent> pe)
-        {
-            using (var connection = new SqlConnection(new DBCOntext().GetdbConnectionString()))
-            {
-                SqlCommand cmd = new SqlCommand("AddPerformerToEvent", connection);
-                cmd.CommandType = CommandType.StoredProcedure;
-                // GetEventShowingDates2<EventShowings>(eventShowings);
-                SqlParameter param = new SqlParameter("@performerevent", PerformerEventDatatable(pe));
-                cmd.Parameters.Add(param);
-                connection.Open();
-                await cmd.ExecuteNonQueryAsync();
-            }
-        }
-
-   
-   
-        //
-        private DataTable PerformerEventDatatable(List<PerformerEvent> pe)
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("performerid");
-            dt.Columns.Add("eventid");
-            foreach (var item in pe)
-            {
-                dt.Rows.Add(item.performerid, item.eventid);
-            }
-            return dt;
-        }
-        //ticketclasses
-
-        //
-        public async Task AddTicketClass2(int eventid, TicketClass ticketClass)
-        {
-            await WithConnection2(async c =>
-            {
-                var sqlparams = new DynamicParameters();
-                sqlparams.Add("@event_id", eventid, DbType.Int32);
-                sqlparams.Add("@name", ticketClass.name, DbType.String);
-                sqlparams.Add("@max_qtperodr", ticketClass.max_per_order, DbType.Int16);
-                sqlparams.Add("@amount", ticketClass.amount, DbType.Decimal);
-                sqlparams.Add("@type", ticketClass.type, DbType.Int16);
-                sqlparams.Add("@tickettosell", ticketClass.ticketstosell, DbType.Int32);
-                sqlparams.Add("@minperorder", ticketClass.min_per_order, DbType.Int16);
-                sqlparams.Add("@visibility", ticketClass.visibility, DbType.Int16);
-                sqlparams.Add("@startsale", ticketClass.startsale, DbType.DateTime);
-                sqlparams.Add("@endsale", ticketClass.endsale, DbType.DateTime);
-                sqlparams.Add("@feestype", ticketClass.feestype, DbType.Int32);
-                sqlparams.Add("@netprice", ticketClass.netamount, DbType.Decimal);
-                sqlparams.Add("@feecharge", ticketClass.fees, DbType.Decimal);
-                sqlparams.Add("@additionalinfo", ticketClass.additionalinfo, DbType.String);
-                await c.ExecuteAsync("AddTicketClass", sqlparams, commandType: CommandType.StoredProcedure);
-            }
-        );
-        }
-
-        public class PerformerEvent
-        {
-            public int performerid;
-            public int eventid;
-        }
+       
 
         public class Eventinfo
         {

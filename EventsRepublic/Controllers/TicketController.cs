@@ -9,35 +9,34 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace EventsRepublic.Controllers
-{
-    
+{ 
     //[Route("api/ticketgroups/")]
     public class TicketController : Controller
     {
         // GET: api/Ticket
         //[HttpGet]
         [HttpGet("api/ticketgroups")]
-        public async Task<string> Get(Guid eventid)
+        public async Task<IActionResult> Get(Guid eventid)
         {
             var ticketRepository = new TicketRespository();
             var EventTicketClasses = await ticketRepository.GeteventTicketClass(eventid);
-            return JsonConvert.SerializeObject(EventTicketClasses);
+            return new ObjectResult(EventTicketClasses);
         }
+
         [HttpGet("api/recurringticketgroups")]
-        public async Task<string> GetReccurenceTickets(Guid eventid,DateTime recurrenceKey)
+        public async Task<IActionResult> GetReccurenceTickets(Guid eventid,DateTime recurrenceKey)
         {
             var ticketRepository = new TicketRespository();
             var EventTicketClasses = await ticketRepository.GetEventRecurringTicketClasses(eventid,recurrenceKey.ToUniversalTime());
-            return JsonConvert.SerializeObject(EventTicketClasses);
+            return new ObjectResult(EventTicketClasses);
         }
-
-        // GET: api/Ticket/5
+        
         [HttpGet("{id}", Name = "Geteventtickclasses")]
         public async Task<string> GetEventTicketClasses(int eventid,int eventshowingdateid)
         {
             return "";
         }
-        // POST: api/Ticket
+        
         [HttpPost]
         public async Task<string> Post([FromBody]object value)
         {
@@ -48,12 +47,10 @@ namespace EventsRepublic.Controllers
             return "";
         }
         
-        // PUT: api/Ticket/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]string value)
         {
-        }
-        
+        }       
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(int id)
