@@ -77,19 +77,16 @@ namespace EventsRepublic.Repository
         /** **/
         public async Task<Ordercreated> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime selecteddate)
         {
-            List<Task> ticketclasstasks = new List<Task>();
+           // List<Task> ticketclasstasks = new List<Task>();
             DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();           
             var ordercreated = await WithConnection(async c =>
              {
                  return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, selecteddate = selecteddate }, commandType: CommandType.StoredProcedure).Single();
-
-                 //return ordercreated;
              });
             if (recurring)
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    //ticketclasstasks.Add(AddRecurringTicketToOrder(item,ordercreated.Expiry, ordercreated.OrdersId, eventid,recurrencekey));
                     await AddRecurringTicketToOrder(item, ordercreated.Expiry, ordercreated.OrdersId, eventid, recurrencekey);
                 }
             }
@@ -102,24 +99,7 @@ namespace EventsRepublic.Repository
                    // ticketclasstasks.Add(AddTicketToOrder(item,Expirytime, ordercreated.OrdersId, eventid));
                 }
             }
-                    
-            Task result = Task.WhenAll(ticketclasstasks);
-            try
-            {
-                await result;
-                return ordercreated;
-            }
-            catch (Exception EX)
-            {
-                var H = 5;
-                return ordercreated;
-            }
-            /**
-            Ordercreated.Amount = await GetOrderPrice(Ordercreated.OrdersId,eventid);
-            Ordercreated.GetTicketReserved = await GetOrderReserved(Ordercreated.OrdersId);
-            
-            return Ordercreated;
-            **/
+            return ordercreated;       
         }
 
         /** **/
