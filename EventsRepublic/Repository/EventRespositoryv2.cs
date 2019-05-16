@@ -30,19 +30,21 @@ namespace EventsRepublic.Repository
                 return Event.FirstOrDefault();
             });
             if (Eventinfo.Recurring)
-            {
-                var constring = await GetCronstring(Eventinfo.IntId);
-                Eventinfo.RecurrenceDates = new ShedulerRepository().GetNextEventOcurrences(constring);
+            {             
+                var recurrence = await GetCronstring(Eventinfo.IntId);
+                Eventinfo.EventRecurrences = recurrence;
+                Eventinfo.EventRecurrences.RecurrenceDates = new ShedulerRepository().GetNextEventOcurrences(recurrence.Cron_string);
+                // Eventinfo.EventRecurrences. = new ShedulerRepository().GetNextEventOcurrences(recurrence.Recurrencestring);
                 return Eventinfo;
             }
             return Eventinfo;
         }
 
-        public async Task<string> GetCronstring(int id)
+        public async Task<Recurrence> GetCronstring(int id)
         {
             return await WithConnection(async c =>
             {
-                var cronstring = await c.QueryAsync<string>(@"select Cron_string from Eventrecurrences where Event_id = @eventid
+                var cronstring = await c.QueryAsync<Recurrence>(@"select * from Eventrecurrences where Event_id = @eventid
                                                             ", new { @eventid = id});
                 return cronstring.FirstOrDefault();
             });
@@ -187,7 +189,7 @@ namespace EventsRepublic.Repository
                     {
                         foreach (var item in eventz.recurringpatterns)
                         {
-                            tocomplete.Add(AddEventRecurrencePattern(Eventid, item.recurringstring, item.intervallengthmins, item.Endtime));
+                            tocomplete.Add(AddEventRecurrencePattern(Eventid, item.recurringstring, item.intervallengthmins, item.Endtime,item.parsedcron));
                             //await AddEventRecurrencePattern(Eventid,item.recurringstring,item.intervallengthmins,item.Endtime);                           
                         }
                         foreach (var item in eventz.ticketClasses)
@@ -200,8 +202,8 @@ namespace EventsRepublic.Repository
                     {
                         foreach (var ticketclass in eventz.ticketClasses)
                         {
-                            tocomplete.Add(new TicketRespository().AddTicketClass(Eventid, ticketclass));
-                          // await new TicketRespository().AddTicketClass(Eventid, ticketclass);
+                           // tocomplete.Add(new TicketRespository().AddTicketClass(Eventid, ticketclass));
+                          await new TicketRespository().AddTicketClass(Eventid, ticketclass);
                         }
                     }                   
                     
@@ -219,7 +221,7 @@ namespace EventsRepublic.Repository
             }          
         }
         
-        public async Task AddEventRecurrencePattern(int eventid,string recurringstring,int intervalminutes,string endtime)
+        public async Task AddEventRecurrencePattern(int eventid,string recurringstring,int intervalminutes,string endtime,string parsedcron)
         {
             await WithConnection2(async c =>
             {
@@ -228,6 +230,7 @@ namespace EventsRepublic.Repository
                 sqlparams.Add("@recurrencepattern",recurringstring, DbType.String);
                 sqlparams.Add("@duration",intervalminutes, DbType.Int32);
                 sqlparams.Add("@endtime",endtime, DbType.String);
+                sqlparams.Add("@parsedcron",parsedcron, DbType.String);
                 await c.ExecuteAsync("AddRecurrence", sqlparams, commandType: CommandType.StoredProcedure);
             });
         }
@@ -245,6 +248,7 @@ namespace EventsRepublic.Repository
             public string Description { get; set; }
             public string Photo { get; set; }
             public bool Recurring { get; set; }
+            public Recurrence EventRecurrences { get; set; }
             public IEnumerable<DateTime> RecurrenceDates { get; set; }
             public string PlaceAddress { get; set; }
             public string Timezone { get; set; }
@@ -265,7 +269,13 @@ namespace EventsRepublic.Repository
             public int Category_Id { get; set; }
             public string Description { get; set; }
         }
+        public class Recurrence
+        {
+           public IEnumerable<DateTime> RecurrenceDates { get; set; }
+           public string Cron_string { get; set; }
+           public int Duration { get; set; }
 
+        }
         public class MonthlyStats
         {
             public string month { get; set; }

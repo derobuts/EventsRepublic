@@ -30,6 +30,7 @@ namespace EventsRepublic.Models
         {
             public string recurringstring { get; set; }
             public int intervallengthmins { get; set; }
+            public string parsedcron { get; set; }
             public string Endtime { get; set; } 
         }
     }  

@@ -164,6 +164,7 @@ namespace EventsRepublic.Repository
     {
         public int TicketClassId { get; set; }
         public bool TicketSaleClosed { get; set; }
+        public bool TicketSaleStarted { get; set; }
         public int Event_Id { get; set; }
         public string Name{ get; set; }
         public decimal Price { get; set; }
@@ -171,5 +172,6 @@ namespace EventsRepublic.Repository
         public bool FewTicketsWarning { get; set; }
         public int MinTicketPerOrder { get; set; }
         public bool IsSoldOut{ get; set; }
+        public DateTime Requestdate { get; set; }
     }
 }

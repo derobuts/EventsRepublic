@@ -75,28 +75,29 @@ namespace EventsRepublic.Repository
             throw new NotImplementedException();
         }
         /** **/
-        public async Task<Ordercreated> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder)
+        public async Task<Ordercreated> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime selecteddate)
         {
             List<Task> ticketclasstasks = new List<Task>();
-            DateTime Expirytime = DateTime.Now.ToUniversalTime().AddMinutes(20);
-            long unixTime = ((DateTimeOffset)Expirytime).ToUnixTimeSeconds();
+            DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();           
             var ordercreated = await WithConnection(async c =>
              {
-                 return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,expiry = Expirytime,noofticketstoreserve = noofticketsinorder }, commandType: CommandType.StoredProcedure).Single();
+                 return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, selecteddate = selecteddate }, commandType: CommandType.StoredProcedure).Single();
                  //return ordercreated;
              });
             if (recurring)
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    ticketclasstasks.Add(AddRecurringTicketToOrder(item, unixTime, ordercreated.OrdersId, eventid,recurrencekey));
+                    ticketclasstasks.Add(AddRecurringTicketToOrder(item,ordercreated.Expiry, ordercreated.OrdersId, eventid,recurrencekey));
                 }
             }
             else
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    ticketclasstasks.Add(AddTicketToOrder(item, unixTime, ordercreated.OrdersId, eventid));
+
+                    await AddTicketToOrder(item, ordercreated.Expiry, ordercreated.OrdersId, eventid);
+                   // ticketclasstasks.Add(AddTicketToOrder(item,Expirytime, ordercreated.OrdersId, eventid));
                 }
             }
                     
@@ -120,7 +121,7 @@ namespace EventsRepublic.Repository
         }
 
         /** **/
-        public async Task AddTicketToOrder(TicketsToReserve ticketsToReserve,long expirytsunixtime,int orderid,int eventid)
+        public async Task AddTicketToOrder(TicketsToReserve ticketsToReserve,DateTime expiryttime,int orderid,int eventid)
         {
             await WithConnection2(
                async c =>
@@ -130,12 +131,12 @@ namespace EventsRepublic.Repository
                    sqlparams.Add("@eventid", eventid, DbType.Int32);
                    sqlparams.Add("@ticketquantity", ticketsToReserve.ticketsselected, DbType.Int32);
                    sqlparams.Add("@orderid",orderid, DbType.Int32);
-                   sqlparams.Add("@expirytime", expirytsunixtime, DbType.Int64);
+                   sqlparams.Add("@expirytime", expiryttime, DbType.DateTime);
                    await c.ExecuteAsync("AddTicketToOrderv32", sqlparams, commandType: CommandType.StoredProcedure);
                }
               );
         }
-        public async Task AddRecurringTicketToOrder(TicketsToReserve ticketsToReserve, long expirytsunixtime, int orderid, int eventid,DateTime recurrencekey)
+        public async Task AddRecurringTicketToOrder(TicketsToReserve ticketsToReserve, DateTime expiryttime, int orderid, int eventid,DateTime recurrencekey)
         {
             await WithConnection2(
                async c =>
@@ -145,7 +146,7 @@ namespace EventsRepublic.Repository
                    sqlparams.Add("@eventid", eventid, DbType.Int32);
                    sqlparams.Add("@ticketquantity", ticketsToReserve.ticketsselected, DbType.Int32);
                    sqlparams.Add("@orderid", orderid, DbType.Int32);
-                   sqlparams.Add("@expirytime", expirytsunixtime, DbType.Int64);
+                   sqlparams.Add("@expirytime", expiryttime, DbType.DateTime);
                    sqlparams.Add("@recurrencekey", recurrencekey, DbType.DateTime);
                    await c.ExecuteAsync("AddRecurringTicketToOrderv32", sqlparams, commandType: CommandType.StoredProcedure);
                }
@@ -325,6 +326,7 @@ namespace EventsRepublic.Repository
         {
            public int OrdersId { get; set; }
            public Guid Unique_Id { get; set; }
+           public DateTime Expiry { get; set; }
     }
         public class TicketClassesReserved
         {
