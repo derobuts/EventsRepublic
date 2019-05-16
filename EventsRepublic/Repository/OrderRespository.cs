@@ -82,13 +82,15 @@ namespace EventsRepublic.Repository
             var ordercreated = await WithConnection(async c =>
              {
                  return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, selecteddate = selecteddate }, commandType: CommandType.StoredProcedure).Single();
+
                  //return ordercreated;
              });
             if (recurring)
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    ticketclasstasks.Add(AddRecurringTicketToOrder(item,ordercreated.Expiry, ordercreated.OrdersId, eventid,recurrencekey));
+                    //ticketclasstasks.Add(AddRecurringTicketToOrder(item,ordercreated.Expiry, ordercreated.OrdersId, eventid,recurrencekey));
+                    await AddRecurringTicketToOrder(item, ordercreated.Expiry, ordercreated.OrdersId, eventid, recurrencekey);
                 }
             }
             else
