@@ -16,7 +16,6 @@ using Newtonsoft.Json;
 
 namespace EventsRepublic.Controllers
 {
-    [ServiceFilter(typeof(CustomAuthorizeFilter))]
     public class EventController : Controller
     {
         // GET: api/Event       

@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 
 namespace EventsRepublic.Controllers
 {
-    [ServiceFilter(typeof(CustomAuthorizeFilter))]
     public class ReportController : Controller
     {
         // GET: api/Report

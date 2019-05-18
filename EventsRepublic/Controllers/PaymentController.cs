@@ -42,7 +42,6 @@ namespace EventsRepublic.Controllers
 
         // POST: api/Payment
         [HttpPost("api/PostPayment")]
-        [ServiceFilter(typeof(CustomAuthorizeFilter))]
         public async Task<ActionResult> Post([FromBody]object value)
         {
             

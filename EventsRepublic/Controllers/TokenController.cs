@@ -34,7 +34,7 @@ namespace EventsRepublic.Controllers
         {
             JsonWebToken jwt = new JsonWebToken();
             var Tokens = JsonConvert.DeserializeObject<Tokens>(value);
-            var newTokensTuple = await  jwt.TokenRenew(Tokens.RefreshToken, Tokens.jwtToken);
+            var newTokensTuple = await  jwt.TokenRenew(Guid.NewGuid(),"HGHFDGDGD");
             if (newTokensTuple.Item1 == true)
             {
                 return new ObjectResult(new { tokens = newTokensTuple.Item2 });

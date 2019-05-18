@@ -75,13 +75,13 @@ namespace EventsRepublic.Repository
             throw new NotImplementedException();
         }
         /** **/
-        public async Task<Ordercreated> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime selecteddate)
+        public async Task<Ordercreated> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
         {
            // List<Task> ticketclasstasks = new List<Task>();
             DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();           
             var ordercreated = await WithConnection(async c =>
              {
-                 return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, selecteddate = selecteddate }, commandType: CommandType.StoredProcedure).Single();
+                 return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, startorderdate = orderstartdate, endorderdate  = orderenddate}, commandType: CommandType.StoredProcedure).Single();
              });
             if (recurring)
             {
@@ -338,7 +338,8 @@ namespace EventsRepublic.Repository
         public List<TicketsToReserve> TicketsToReserve { get; set; }
         public int Eventid { get; set; }
         public bool Recurring { get; set; }
-        public DateTime OrderDate { get; set; }
+        public DateTime OrderStartDate { get; set; }
+        public DateTime OrderEndDate { get; set; }
         public int NoofTicketsInOrder { get; set; }
     }
 }

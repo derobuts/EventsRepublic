@@ -2,6 +2,7 @@
 using EventsRepublic.Models;
 using EventsRepublic.Repository;
 using EventsRepublic.Serializers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -9,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Controllers
 {
+    [Authorize]
     [Route("api/Order")]
     public class OrderController : Controller
     {
-        // GET: api/Order
-        [ServiceFilter(typeof(CustomAuthorizeFilter))]
+        // GET: api/Orde
         [HttpGet]
         public async Task<int> GetAsync()
         {
@@ -24,26 +25,21 @@ namespace EventsRepublic.Controllers
 
         // POST: api/Order
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]object value)
+        public async Task<IActionResult> Post([FromBody]OrdertoBeReserved ordertoBeReserved)
         {
-            OrderRespository orderRespository = new OrderRespository();
-            DateTime recurrencekey = DateTime.Now;
-            JsonSerializerDeserializer jsonSerializerDeserializer = new JsonSerializerDeserializer();
-            OrdertoBeReserved ordertobereserved = jsonSerializerDeserializer.ToObject<OrdertoBeReserved>(value.ToString());
-            Payload payload = new Payload();
-            payload.Role = 3;
-            payload.Isregistered = false;
-            payload.Iat = DateTimeOffset.Now.ToUnixTimeSeconds();
-            payload.Expiry = DateTimeOffset.Now.AddMinutes(15).ToUnixTimeSeconds();
-            payload.UserId = 5;
-
-            if (ordertobereserved.Recurring)
+            if (ModelState.IsValid)
             {
-                recurrencekey = ordertobereserved.OrderDate.ToUniversalTime();
+                OrderRespository orderRespository = new OrderRespository();
+                DateTime recurrencekey = DateTime.Now;         
+                if (ordertoBeReserved.Recurring)
+                {
+                    recurrencekey = ordertoBeReserved.OrderStartDate.ToUniversalTime();
+                }
+                var ordercreated = await orderRespository.CreatOrder(ordertoBeReserved.Eventid, 5, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, recurrencekey, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
+                var chkouttoken = JsonWebToken.GetToken(new { });
+                return Ok(JsonConvert.SerializeObject(new { token = chkouttoken, orderReserved = ordercreated }));
             }
-            var ordercreated = await orderRespository.CreatOrder(ordertobereserved.Eventid,5, ordertobereserved.TicketsToReserve,ordertobereserved.Recurring,recurrencekey,ordertobereserved.NoofTicketsInOrder,ordertobereserved.OrderDate.ToUniversalTime());
-            var chkouttoken = JsonWebToken.GetToken(payload);
-            return Ok(JsonConvert.SerializeObject(new { token = chkouttoken, orderReserved = ordercreated }));
+            return NotFound();
         }
         //confirm payment
         [HttpPut("{id}")]
