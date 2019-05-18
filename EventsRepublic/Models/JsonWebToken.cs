@@ -85,7 +85,7 @@ namespace EventsRepublic.Models
             //check if token has expired and use refresh token to renew
            var isTokenvalid = ValidateToken(Token, true);
            // bool refreshtoken = false;
-            Guid dbRefreshTokenGuid;
+            Guid dbRefreshTokenGuid = Guid.NewGuid();
            
             if (isTokenvalid.Item2 == "expired")
             {

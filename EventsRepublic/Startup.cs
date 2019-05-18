@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EventsRepublic.Attributes;
+using EventsRepublic.Data;
 using EventsRepublic.Database;
 using EventsRepublic.Middleware;
 using EventsRepublic.Models;
@@ -11,6 +12,7 @@ using EventsRepublic.Models.Mpesa;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +35,21 @@ namespace EventsRepublic
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultDbConnection"));
+            });
+            services.AddIdentity<AppUser, IdentityRole>(
+                   option =>
+                   {
+                       option.Password.RequireDigit = false;
+                       option.Password.RequiredLength = 6;
+                       option.Password.RequireNonAlphanumeric = false;
+                       option.Password.RequireUppercase = false;
+                       option.Password.RequireLowercase = false;
+                   }
+               ).AddEntityFrameworkStores<ApplicationDbContext>()
+               .AddDefaultTokenProviders();
             /*services.AddDbContext<DataContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             */

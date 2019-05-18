@@ -17,24 +17,9 @@ using Newtonsoft.Json;
 namespace EventsRepublic.Controllers
 {
     public class EventController : Controller
-    {
-        // GET: api/Event       
-        [HttpGet("api/getevents")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetEvents(decimal latitude,decimal longitude,int pageno,int pagesize,int categoryid)
-        {
-           
-            var getEvents = new EventRespositoryv2();
-            var querystring = Request.Query;
-           latitude = decimal.Parse(querystring["latitude"]);
-           longitude = decimal.Parse(querystring["longitude"]);
-           string timezone = querystring["longitude"];     
-            // var loc = JsonConvert.DeserializeObject<JsonLocation>(value.ToString());
-           var homepageEvents =  await getEvents.PopularNearby(latitude,longitude);
-           return Ok(JsonConvert.SerializeObject(homepageEvents));      
-        }
+    {       
         [HttpGet("api/eventsnearby")]
-        [AllowAnonymous]
+      
         public async Task<IActionResult> EventsNearby(decimal latitude, decimal longitude)
         {
             var getEventsNearby = new EventRespositoryv2();
