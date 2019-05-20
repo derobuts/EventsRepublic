@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class PaymentRepository : BaseRepository<Payment>
+    public class PaymentRepository : BaseRepository
     {
          
     }

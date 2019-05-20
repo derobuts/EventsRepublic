@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class Reports : BaseRepository<Reports>
+    public class Reports : BaseRepository
     {
         public async Task<IEnumerable<OrderReports>> GetOrderReports(int userid,DateTime startdate, DateTime enddate)
         {

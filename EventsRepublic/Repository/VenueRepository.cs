@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class VenueRepository : BaseRepository<Venue>
+    public class VenueRepository : BaseRepository
     {
         
         //get event venue by name

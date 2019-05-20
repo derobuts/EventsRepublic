@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class DashboardRepository : BaseRepository<T>
+    public class DashboardRepository : BaseRepository
     {
      
 

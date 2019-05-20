@@ -14,7 +14,7 @@ using static EventsRepublic.Models.JsonWebToken;
 
 namespace EventsRepublic.Models
 {
-    public class JsonWebToken : BaseRepository<UsersRoles>
+    public class JsonWebToken : BaseRepository
     {
         //will use sha256
         //will add other algorithim later/google/facebook/

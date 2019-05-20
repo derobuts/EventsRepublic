@@ -16,7 +16,7 @@ using System.Transactions;
 
 namespace EventsRepublic.Repository
 {
-    public class UserRespirotory : BaseRepository<UserInfo>
+    public class UserRespirotory : BaseRepository
     {
         public async Task<int> AddGuestCheckoutUser(UserInfo User)
         {

@@ -15,7 +15,7 @@ using System.Transactions;
 
 namespace EventsRepublic.Repository
 {
-    public class EventRespositoryv2 : BaseRepository<Event>
+    public class EventRespositoryv2 : BaseRepository
     {
         public async Task<Eventinfo> GeteventDetails(Guid eventid)
         {     

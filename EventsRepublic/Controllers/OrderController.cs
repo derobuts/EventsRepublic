@@ -1,46 +1,64 @@
 ﻿using EventsRepublic.Attributes;
+using EventsRepublic.Data;
+using EventsRepublic.InterFace;
 using EventsRepublic.Models;
 using EventsRepublic.Repository;
 using EventsRepublic.Serializers;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace EventsRepublic.Controllers
-{
-    [Authorize]
+{ 
     [Route("api/Order")]
+    [Authorize]
     public class OrderController : Controller
     {
-        // GET: api/Orde
-        [HttpGet]
-        public async Task<int> GetAsync()
+        private readonly IOrderRepository _orderRepository;
+        private readonly Microsoft.AspNetCore.Identity.UserManager<AppUser> _userManager;
+        public OrderController(Microsoft.AspNetCore.Identity.UserManager<AppUser> userManager,IOrderRepository orderRepository)
         {
-            OrderRespository confirmorder = new OrderRespository();
-            // var k = await confirmorder.ConfirmOrder(i);
-            return 0;
+            _orderRepository = orderRepository;
+            _userManager = userManager;
         }
 
         // POST: api/Order
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]OrdertoBeReserved ordertoBeReserved)
-        {
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateOrder([FromBody]OrdertoBeReserved ordertoBeReserved)
+        {                                  
             if (ModelState.IsValid)
             {
+                var h = _orderRepository;
+                AppUser appUser = new AppUser();
+                bool isAuthenticated = User.Identity.IsAuthenticated;
+                if (!isAuthenticated)
+                {
+                    appUser = new AppUser { UserName = Guid.NewGuid().ToString(), SecurityStamp = Guid.NewGuid().ToString() };
+                    var result = await _userManager.CreateAsync(appUser);
+                    if (result.Succeeded)
+                    {
+                        Claim newClaim = new Claim(ClaimTypes.Role, "Customer");
+                        await _userManager.AddClaimAsync(appUser, newClaim);
+                    }
+                }
+
                 OrderRespository orderRespository = new OrderRespository();
-                DateTime recurrencekey = DateTime.Now;         
+                DateTime recurrencekey = DateTime.Now;
                 if (ordertoBeReserved.Recurring)
                 {
                     recurrencekey = ordertoBeReserved.OrderStartDate.ToUniversalTime();
                 }
-                var ordercreated = await orderRespository.CreatOrder(ordertoBeReserved.Eventid, 5, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, recurrencekey, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
-                var chkouttoken = JsonWebToken.GetToken(new { });
-                return Ok(JsonConvert.SerializeObject(new { token = chkouttoken, orderReserved = ordercreated }));
+                await orderRespository.CreatOrder(ordertoBeReserved.Eventid, appUser.Id, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, recurrencekey, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
+                return Accepted();
             }
-            return NotFound();
-        }
+               return NotFound();
+}
         //confirm payment
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]object value)

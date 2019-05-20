@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class PerformerRepository : BaseRepository<Performer>
+    public class PerformerRepository : BaseRepository
     {
         //get event venue by name
         public async Task<IEnumerable<T>> GetPerformerbyname<T>(string searchword, int lastrecordno, int noofrowsreturn)

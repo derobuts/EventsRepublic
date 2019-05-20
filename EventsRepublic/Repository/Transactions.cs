@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class Transactions : BaseRepository<Transactions>
+    public class Transactions : BaseRepository
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }

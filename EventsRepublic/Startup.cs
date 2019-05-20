@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using EventsRepublic.Attributes;
 using EventsRepublic.Data;
 using EventsRepublic.Database;
+using EventsRepublic.InterFace;
 using EventsRepublic.Middleware;
 using EventsRepublic.Models;
 using EventsRepublic.Models.Mpesa;
+using EventsRepublic.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -83,7 +85,7 @@ namespace EventsRepublic
             services.AddMvc();
 
             services.AddSingleton<MPESAHTTP>();
-
+            services.AddScoped<IOrderRepository, OrderRespository>();
             //services.AddScoped<CustomAuthorizeFilter>();
 
         }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class TicketRespository : BaseRepository<TicketClass>
+    public class TicketRespository : BaseRepository
     {        
         public async Task<IEnumerable<TicketClassSubinfo>> GeteventTicketClass(Guid eventid)
         {

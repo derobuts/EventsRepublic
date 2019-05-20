@@ -1,8 +1,11 @@
 ﻿using Dapper;
 using EventsRepublic.Database;
+using EventsRepublic.InterFace;
 using EventsRepublic.Models;
 using EventsRepublic.Models.Interface;
 using EventsRepublic.Models.Mpesa;
+using EventsRepublic.ViewModel;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using QRCoder;
 using SendGrid;
@@ -17,22 +20,25 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class OrderRespository : BaseRepository<Event>
+    public class OrderRespository  : BaseRepository,IOrderRepository
     {
+        
         /** **/
-        public async Task<IEnumerable<TicketClassesReserved>> GetOrderReserved(int orderid)
+        public async Task<IEnumerable<OrderSummary>> GetOrderReserved(int orderid)
         {
             return await WithConnection(async c =>
             {
                 var sqlparams = new DynamicParameters();
                 sqlparams.Add("@orderid", orderid, DbType.Int32);
                 //sqlparams.Add("@eventid", eventid, DbType.Int32);
-                var resorder = await c.QueryAsync<TicketClassesReserved>("GetOrderReserved",
+                var resorder = await c.QueryAsync<OrderSummary>("GetOrderReserved",
                 sqlparams,
                 commandType: CommandType.StoredProcedure);
                 return resorder;
             });
         }
+
+
         //
         public void DeleteOrder(int id)
         {
@@ -40,7 +46,6 @@ namespace EventsRepublic.Repository
             orderid.Value = id;
             var _context = new DBContext(new DBCOntext(), "DeleteOrder", orderid);
         }
-
         /** **/
         public async Task<int> ValidateOrderC2B(int ordermobilerefno, decimal amount)
         {
@@ -55,10 +60,8 @@ namespace EventsRepublic.Repository
                 return mobileref;
             });
         }
-
-      
-        /** **/
-       
+     
+        /** **/       
         public async Task<Order> GetUserOrder(int userid)
         {
           return await WithConnection(async c =>
@@ -69,39 +72,62 @@ namespace EventsRepublic.Repository
             );
            
         }
-
         public IEnumerable<Order> GetOrders()
         {
             throw new NotImplementedException();
         }
         /** **/
-        public async Task<Ordercreated> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
+        public async Task CreatOrder(int eventid,string userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
         {
            // List<Task> ticketclasstasks = new List<Task>();
-            DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();           
-            var ordercreated = await WithConnection(async c =>
+            DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();
+            //OrderSummary orderSummary = new OrderSummary();
+             var orderid = await WithConnection(async c =>
              {
-                 return c.Query<Ordercreated>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, startorderdate = orderstartdate, endorderdate  = orderenddate}, commandType: CommandType.StoredProcedure).Single();
+                 return c.Query<int>("AddOrderv32", new { eventid = eventid,userid = userid,noofticketstoreserve = noofticketsinorder, startorderdate = orderstartdate, endorderdate  = orderenddate,expiry = Expirytime}, commandType: CommandType.StoredProcedure).Single();
              });
             if (recurring)
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    await AddRecurringTicketToOrder(item, ordercreated.Expiry, ordercreated.OrdersId, eventid, recurrencekey);
+                    await AddRecurringTicketToOrder(item,Expirytime,orderid, eventid, recurrencekey);
                 }
             }
             else
             {
                 foreach (var item in ticketsToReserve)
                 {
-
-                    await AddTicketToOrder(item, ordercreated.Expiry, ordercreated.OrdersId, eventid);
+                    await AddTicketToOrder(item,Expirytime,orderid, eventid);
                    // ticketclasstasks.Add(AddTicketToOrder(item,Expirytime, ordercreated.OrdersId, eventid));
                 }
-            }
-            return ordercreated;       
+            } 
         }
 
+        public async Task<IActionResult> MyOrders()
+        {
+            var orders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
+
+            var viewModel = orders
+                .Select(o => new OrderViewModel()
+                {
+                    OrderDate = o.OrderDate,
+                    OrderItems = o.OrderItems?.Select(oi => new OrderItemViewModel()
+                    {
+                        Discount = 0,
+                        PictureUrl = oi.ItemOrdered.PictureUri,
+                        ProductId = oi.ItemOrdered.CatalogItemId,
+                        ProductName = oi.ItemOrdered.ProductName,
+                        UnitPrice = oi.UnitPrice,
+                        Units = oi.Units
+                    }).ToList(),
+                    OrderNumber = o.Id,
+                    ShippingAddress = o.ShipToAddress,
+                    Status = "Pending",
+                    Total = o.Total()
+
+                });
+            return View(viewModel);
+        }
         /** **/
         public async Task AddTicketToOrder(TicketsToReserve ticketsToReserve,DateTime expiryttime,int orderid,int eventid)
         {
@@ -135,6 +161,7 @@ namespace EventsRepublic.Repository
               );
         }
 
+       
 
         public async void UpdateConfirmedOrder (int orderid, string txcode)
         {
@@ -283,6 +310,33 @@ namespace EventsRepublic.Repository
             var h = Convert.ToBase64String(qrCodeImageBmp);
             return h;
         }
+
+        public Task<T> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<T>> ListAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public Task UpdateAsync(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAsync(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> AddAsync(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
         private class BoughtTickets
         {
             public string TicketClassName { get; set; }
