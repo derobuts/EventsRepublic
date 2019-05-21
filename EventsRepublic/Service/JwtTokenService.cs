@@ -32,7 +32,9 @@ namespace EventsRepublic.Service
             int expiryInMinutes = Convert.ToInt32(_config["Jwt:ExpireTime"]);
             var token = new JwtSecurityToken(
               issuer: _config["Jwt:Issuer"],
+             
               audience: _config["Jwt:Audience"],
+               claims,
               expires: DateTime.UtcNow.AddMinutes(expiryInMinutes),
               signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );

@@ -11,6 +11,7 @@ using EventsRepublic.Middleware;
 using EventsRepublic.Models;
 using EventsRepublic.Models.Mpesa;
 using EventsRepublic.Repository;
+using EventsRepublic.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -86,6 +87,7 @@ namespace EventsRepublic
 
             services.AddSingleton<MPESAHTTP>();
             services.AddScoped<IOrderRepository, OrderRespository>();
+            services.AddTransient<IJwtTokenService,JwtTokenService>();
             //services.AddScoped<CustomAuthorizeFilter>();
 
         }

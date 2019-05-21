@@ -33,7 +33,7 @@ namespace EventsRepublic.Controllers
         public async Task<IActionResult> PostAsync([FromBody]string value)
         {
             JsonWebToken jwt = new JsonWebToken();
-            var Tokens = JsonConvert.DeserializeObject<Tokens>(value);
+            var Tokens = JsonConvert.DeserializeObject<Token>(value);
             var newTokensTuple = await  jwt.TokenRenew(Guid.NewGuid(),"HGHFDGDGD");
             if (newTokensTuple.Item1 == true)
             {

@@ -103,31 +103,7 @@ namespace EventsRepublic.Repository
             } 
         }
 
-        public async Task<IActionResult> MyOrders()
-        {
-            var orders = await _orderRepository.ListAsync(new CustomerOrdersWithItemsSpecification(User.Identity.Name));
-
-            var viewModel = orders
-                .Select(o => new OrderViewModel()
-                {
-                    OrderDate = o.OrderDate,
-                    OrderItems = o.OrderItems?.Select(oi => new OrderItemViewModel()
-                    {
-                        Discount = 0,
-                        PictureUrl = oi.ItemOrdered.PictureUri,
-                        ProductId = oi.ItemOrdered.CatalogItemId,
-                        ProductName = oi.ItemOrdered.ProductName,
-                        UnitPrice = oi.UnitPrice,
-                        Units = oi.Units
-                    }).ToList(),
-                    OrderNumber = o.Id,
-                    ShippingAddress = o.ShipToAddress,
-                    Status = "Pending",
-                    Total = o.Total()
-
-                });
-            return View(viewModel);
-        }
+      
         /** **/
         public async Task AddTicketToOrder(TicketsToReserve ticketsToReserve,DateTime expiryttime,int orderid,int eventid)
         {
