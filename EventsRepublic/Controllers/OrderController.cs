@@ -57,7 +57,7 @@ namespace EventsRepublic.Controllers
                 await orderRespository.CreatOrder(ordertoBeReserved.Eventid, appUser.Id, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, recurrencekey, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
                 return Accepted();
             }
-               return NotFound();
+            return NotFound();
 }
         //confirm payment
         [HttpPut("{id}")]
