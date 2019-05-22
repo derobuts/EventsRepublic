@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using EventsRepublic.InterFace;
 using EventsRepublic.Models;
 using System;
 using System.Collections.Generic;
@@ -8,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace EventsRepublic.Repository
 {
-    public class TicketRespository : BaseRepository
-    {        
+    public class TicketRespository : BaseRepository, IticketRepository
+    {
         public async Task<IEnumerable<TicketClassSubinfo>> GeteventTicketClass(Guid eventid)
         {
             return await WithConnection(async c =>
             {
                 var sqlparams = new DynamicParameters();
-                sqlparams.Add("@eventid",eventid, DbType.Guid);
+                sqlparams.Add("@eventid", eventid, DbType.Guid);
                 var TicketClass = await c.QueryAsync<TicketClassSubinfo>("GetEventTicketClasses"
                     , sqlparams,
                     commandType: CommandType.StoredProcedure
@@ -23,14 +24,16 @@ namespace EventsRepublic.Repository
                 return TicketClass;
             });
         }
-        public async Task<IEnumerable<TicketClassSubinfo>> GetEventRecurringTicketClasses(Guid eventid,DateTime recurrencekey)
+        /** **/
+       
+        public async Task<IEnumerable<TicketClassSubinfo>> GetEventRecurringTicketClasses(Guid eventid, DateTime recurrencekey)
         {
             await CheckIfRecurrenceDateExists(recurrencekey, eventid);
             return await WithConnection(async c =>
             {
                 var sqlparams = new DynamicParameters();
                 sqlparams.Add("@eventid", eventid, DbType.Guid);
-                sqlparams.Add("@recurrencekey",recurrencekey, DbType.DateTime);
+                sqlparams.Add("@recurrencekey", recurrencekey, DbType.DateTime);
                 var TicketClass = await c.QueryAsync<TicketClassSubinfo>("GetEventRecurringTicketClasses"
                     , sqlparams,
                     commandType: CommandType.StoredProcedure
@@ -109,13 +112,12 @@ namespace EventsRepublic.Repository
 
         public async Task<bool> ReserveTickets(int eventid, List<TicketsToReserve> ticketsToReserve)
         {
-
             List<Task> ticketclasstasks = new List<Task>();
             var reservationKey = Guid.NewGuid();
-            var unixtime = this.UnixTimeNow();          
+            var unixtime = this.UnixTimeNow();
             foreach (var item in ticketsToReserve)
             {
-                ticketclasstasks.Add(ReserveTicket(item,reservationKey,unixtime,eventid));
+                ticketclasstasks.Add(ReserveTicket(item, reservationKey, unixtime, eventid));
             }
             Task result = Task.WhenAll(ticketclasstasks);
             try
@@ -154,11 +156,11 @@ namespace EventsRepublic.Repository
         public async void ConfirmTicketsBought(int orderid)
         {
             await WithConnection2(
-            async c => {
+            async c =>
+            {
                 await c.ExecuteAsync(@"UPDATE Ticket SET Status = 102 WHERE Order_Id = @orderid", new { @orderid = orderid });
-          });
+            });
         }
-
     }
     public class TicketClassSubinfo
     {
@@ -166,12 +168,12 @@ namespace EventsRepublic.Repository
         public bool TicketSaleClosed { get; set; }
         public bool TicketSaleStarted { get; set; }
         public int Event_Id { get; set; }
-        public string Name{ get; set; }
+        public string Name { get; set; }
         public decimal Price { get; set; }
         public int Max_Qt_Per_Order { get; set; }
         public bool FewTicketsWarning { get; set; }
         public int MinTicketPerOrder { get; set; }
-        public bool IsSoldOut{ get; set; }
+        public bool IsSoldOut { get; set; }
         public DateTime Requestdate { get; set; }
     }
 }

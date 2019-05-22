@@ -51,10 +51,10 @@ namespace EventsRepublic.Controllers
             var paymentpayload = JsonConvert.DeserializeObject<PaymentPayloadRootObject>(value.ToString());
             //
             OrderRespository orderRespository = new OrderRespository();
-            var getuserorder = await orderRespository.GetUserOrder(Userinfo.UserId);
+            //var getuserorder = await orderRespository.GetUserOrder(Userinfo.UserId);
 
             PaymentProcessor paymentProcessor = new PaymentProcessor();
-            paymentProcessor.MakePayment((PaymentMethod)paymentpayload.PaymentPayload.Paymentmethod, getuserorder,paymentpayload.PaymentPayload);
+           // paymentProcessor.MakePayment((PaymentMethod)paymentpayload.PaymentPayload.Paymentmethod, getuserorder,paymentpayload.PaymentPayload);
             return Ok();
         }
         //

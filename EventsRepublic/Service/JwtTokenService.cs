@@ -1,4 +1,5 @@
-﻿using EventsRepublic.InterFace;
+﻿using EventsRepublic.Data;
+using EventsRepublic.InterFace;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -18,16 +19,16 @@ namespace EventsRepublic.Service
         {
             _config = config;
         }
-        public Token CreateToken(string Id)
+        public Token CreateToken(AppUser appUser)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub,Id),
+                new Claim(JwtRegisteredClaimNames.Sub,appUser.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
             };
             //create a key from our private key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            //var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             //create token
             int expiryInMinutes = Convert.ToInt32(_config["Jwt:ExpireTime"]);
             var token = new JwtSecurityToken(

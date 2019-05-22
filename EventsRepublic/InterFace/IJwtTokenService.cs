@@ -1,4 +1,5 @@
-﻿using EventsRepublic.Service;
+﻿using EventsRepublic.Data;
+using EventsRepublic.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,6 @@ namespace EventsRepublic.InterFace
 {
     public interface IJwtTokenService
     {
-        Token CreateToken(string Id);
+        Token CreateToken(AppUser appUser);
     }
 }

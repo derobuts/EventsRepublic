@@ -1,4 +1,6 @@
 ﻿using EventsRepublic.Models;
+using EventsRepublic.Repository;
+using EventsRepublic.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +12,8 @@ namespace EventsRepublic.InterFace
     {
         Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> ListAllAsync();
-        Task<T> AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(T entity);
+        Task<int> CreatOrder(int eventid, int userid, List<TicketsToReserve> ticketsToReserve, bool recurring, int noofticketsinorder, DateTime orderstartdate, DateTime orderenddate);
+        Task<OrderSummary> GetUserOrder(int orderid,int userid);
+        Task<IEnumerable<OrderItem>> GetItemsinOrder(int orderid);
     }
 }

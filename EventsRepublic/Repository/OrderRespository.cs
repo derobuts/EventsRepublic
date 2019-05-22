@@ -21,8 +21,7 @@ using System.Threading.Tasks;
 namespace EventsRepublic.Repository
 {
     public class OrderRespository  : BaseRepository,IOrderRepository
-    {
-        
+    {       
         /** **/
         public async Task<IEnumerable<OrderSummary>> GetOrderReserved(int orderid)
         {
@@ -37,15 +36,7 @@ namespace EventsRepublic.Repository
                 return resorder;
             });
         }
-
-
-        //
-        public void DeleteOrder(int id)
-        {
-            var orderid = new SqlParameter("@orderid", SqlDbType.Int);
-            orderid.Value = id;
-            var _context = new DBContext(new DBCOntext(), "DeleteOrder", orderid);
-        }
+      
         /** **/
         public async Task<int> ValidateOrderC2B(int ordermobilerefno, decimal amount)
         {
@@ -60,24 +51,17 @@ namespace EventsRepublic.Repository
                 return mobileref;
             });
         }
-     
-        /** **/       
-        public async Task<Order> GetUserOrder(int userid)
-        {
-          return await WithConnection(async c =>
-           {
-                var userorder = c.Query<Order>(@"select OrdersId,Amount from OrderTransaction where UserId = @userid", new { @userid = userid }).Single();
-               return userorder;
-            }
-            );
-           
-        }
-        public IEnumerable<Order> GetOrders()
-        {
-            throw new NotImplementedException();
-        }
+
         /** **/
-        public async Task CreatOrder(int eventid,string userid, List<TicketsToReserve> ticketsToReserve,bool recurring,DateTime recurrencekey,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
+        public async Task<OrderSummary> GetUserOrder(int orderid,int userid) => await WithConnection(async c =>
+                                                                              {
+                                                                                  return c.Query<OrderSummary>(@"select Top 1 Expiryts,Status,Amount,(case when NoOfTicketsReserved = NoOfTicketsRequested
+                                                                                  then 1 else 0 end)as AllItemsReserved
+                                                                                  from Orders where OrdersId = @orderid and UserId = @userid", new { @orderid = orderid, @userid = userid }).FirstOrDefault();
+                                                                              }
+        );      
+        /** **/
+        public async Task<int> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
         {
            // List<Task> ticketclasstasks = new List<Task>();
             DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();
@@ -90,20 +74,29 @@ namespace EventsRepublic.Repository
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    await AddRecurringTicketToOrder(item,Expirytime,orderid, eventid, recurrencekey);
+                    await AddRecurringTicketToOrder(item,Expirytime,orderid, eventid,orderstartdate.ToUniversalTime());
                 }
             }
             else
             {
                 foreach (var item in ticketsToReserve)
                 {
-                    await AddTicketToOrder(item,Expirytime,orderid, eventid);
-                   // ticketclasstasks.Add(AddTicketToOrder(item,Expirytime, ordercreated.OrdersId, eventid));
+                    await AddTicketToOrder(item,Expirytime,orderid, eventid);                 
                 }
-            } 
+            }
+            return orderid;
         }
-
-      
+        public async Task<IEnumerable<OrderItem>> GetItemsinOrder(int orderid) => await WithConnection(async c =>
+        {
+            return await c.QueryAsync<OrderItem>(@"select Tc.Name,Tc.Price,quantity.Quantity from
+                                      (
+                                      SELECT Class_Id, COUNT(Id) AS Quantity FROM Ticket T
+                                      WHERE Order_Id = @orderid
+                                      group by Class_Id
+                                      ) as quantity
+                                      inner join TicketClass Tc on Tc.TicketId = quantity.Class_Id", new { @orderid = orderid });
+        }
+       );
         /** **/
         public async Task AddTicketToOrder(TicketsToReserve ticketsToReserve,DateTime expiryttime,int orderid,int eventid)
         {
@@ -136,9 +129,6 @@ namespace EventsRepublic.Repository
                }
               );
         }
-
-       
-
         public async void UpdateConfirmedOrder (int orderid, string txcode)
         {
             await WithConnection2(

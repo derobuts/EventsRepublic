@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -38,40 +39,58 @@ namespace EventsRepublic.Controllers
         {                                  
             if (ModelState.IsValid)
             {
-                var h = _orderRepository;
-                AppUser appUser = new AppUser();
-               
-                bool isAuthenticated = User.Identity.IsAuthenticated;
-                if (!isAuthenticated)
-                {
-                    appUser = new AppUser { UserName = Guid.NewGuid().ToString(), SecurityStamp = Guid.NewGuid().ToString()};
-                    var result = await _userManager.CreateAsync(appUser);
+                try
+                {                                    
+                    var appUser = new AppUser { UserName = Guid.NewGuid().ToString(), SecurityStamp = Guid.NewGuid().ToString(), Email = "Guest@eventdb" };
+                    var result = await _userManager.CreateAsync(appUser);                   
                     if (result.Succeeded)
                     {
-                        List<Claim> Claims = new List<Claim>() { new Claim(ClaimTypes.Role, "Guest Customer"), new Claim(ClaimTypes.Email,appUser.Email)};                        
+                        List<Claim> Claims = new List<Claim>() { new Claim(ClaimTypes.Role, "GuestCustomer")};                        
                         await _userManager.AddClaimsAsync(appUser,Claims);
                     }
+                    else
+                    {
+                        return NotFound();
+                    }                          
+                    int Orderid = await _orderRepository.CreatOrder(ordertoBeReserved.Eventid, appUser.Id, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
+                    return Ok(new {token = _jwtTokenService.CreateToken(appUser),orderid = Orderid});
                 }
-                OrderRespository orderRespository = new OrderRespository();
-                DateTime recurrencekey = DateTime.Now;
-                if (ordertoBeReserved.Recurring)
+                catch (Exception ex)
                 {
-                    recurrencekey = ordertoBeReserved.OrderStartDate.ToUniversalTime();
-                }              
-                await orderRespository.CreatOrder(ordertoBeReserved.Eventid, appUser.Id, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, recurrencekey, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
-                return Accepted(_jwtTokenService.CreateToken(appUser.Id));
+
+                    throw;
+                }
             }
             return NotFound();
 }
         //confirm payment
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]object value)
-        {
+        { 
             OrderRespository confirmorder = new OrderRespository();
             var _orderconfirm = JsonConvert.DeserializeObject<OrderToPay>(value.ToString());
              //var resultcode = confirmorder.ConfirmOrder(_orderconfirm.orderid, _orderconfirm.amount,_orderconfirm.eventid);           
         }
+        [HttpGet()]
+        public async Task<IActionResult>UserOrder(int orderid)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var currentuserid = User.Identity.GetUserId<int>();
+                    var Ordersummary = await _orderRepository.GetUserOrder(orderid,currentuserid);
+                    Ordersummary.Reserveditems = await _orderRepository.GetItemsinOrder(orderid);
+                    return Ok(Ordersummary);
+                }
+                catch (Exception ex)
+                {
 
+                    throw;
+                }
+            }    
+            return NotFound();
+        }
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(int id)

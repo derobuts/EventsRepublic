@@ -3,16 +3,20 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace EventsRepublic.Data
 {
-    public class AppUser : IdentityUser
+    public class AppUser : IdentityUser<int>
     {
-        public int UserIntid { get; set; }
+        
     }
-    public class ApplicationDbContext : IdentityDbContext<AppUser>
+    public class ApplicationRole : IdentityRole<int>
+    {
+    }
+    public class ApplicationDbContext : IdentityDbContext<AppUser,ApplicationRole,int>
     {
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 

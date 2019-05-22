@@ -42,7 +42,7 @@ namespace EventsRepublic
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultDbConnection"));
             });
-            services.AddIdentity<AppUser, IdentityRole>(
+            services.AddIdentity<AppUser,ApplicationRole>(
                    option =>
                    {
                        option.Password.RequireDigit = false;
@@ -76,10 +76,11 @@ namespace EventsRepublic
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ValidAudience = Configuration["Jwt:Audience"],
                     ValidIssuer = Configuration["Jwt:Issuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["HMAC256:Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SigningKey"]))
                 };
             });
             

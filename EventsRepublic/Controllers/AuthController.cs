@@ -33,7 +33,7 @@ namespace EventsRepublic.Controllers
             var user = await _userManager.FindByEmailAsync(value.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, value.Password))
             {
-                _jwtTokenService.CreateToken(user.Id);
+                _jwtTokenService.CreateToken(user);
             }
             return Unauthorized();
         }
