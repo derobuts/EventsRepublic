@@ -21,6 +21,11 @@ namespace EventsRepublic.Controllers
 {  
     public class PaymentController : Controller
     {
+        private readonly IMpesaHttp _mpesahttp;
+        public PaymentController(IMpesaHttp mpesaHttp)
+        {
+            _mpesahttp = mpesaHttp;
+        }
         // GET: api/Payment
         [HttpGet]
         public IEnumerable<string> Get()

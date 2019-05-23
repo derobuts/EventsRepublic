@@ -86,7 +86,7 @@ namespace EventsRepublic
             
             services.AddMvc();
 
-            services.AddSingleton<MPESAHTTP>();
+            services.AddSingleton<IMpesaHttp, MPESAHTTP>();
             services.AddScoped<IOrderRepository, OrderRespository>();
             services.AddTransient<IJwtTokenService,JwtTokenService>();
             //services.AddScoped<CustomAuthorizeFilter>();

@@ -76,18 +76,10 @@ namespace EventsRepublic.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
-                {
                     var currentuserid = User.Identity.GetUserId<int>();
                     var Ordersummary = await _orderRepository.GetUserOrder(orderid,currentuserid);
                     Ordersummary.Reserveditems = await _orderRepository.GetItemsinOrder(orderid);
                     return Ok(Ordersummary);
-                }
-                catch (Exception ex)
-                {
-
-                    throw;
-                }
             }    
             return NotFound();
         }

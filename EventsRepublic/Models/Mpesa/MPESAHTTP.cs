@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using EventsRepublic.InterFace;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace EventsRepublic.Models.Mpesa
      * make method generic to accomodate all http calls from diferent methods
      * Rem to use singleton Dependency injection later
     **/
-    public  class MPESAHTTP
+    public  class MPESAHTTP : IMpesaHttp
     {
         private readonly static HttpClient httpClient = new HttpClient();
         public static MPESAHTTP GetInstance { get; } = new MPESAHTTP();
