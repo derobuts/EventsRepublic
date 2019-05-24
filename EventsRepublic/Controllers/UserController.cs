@@ -25,9 +25,9 @@ namespace EventsRepublic.Controllers
         {
             //ConsumerToBusiness.Registerc2burl();
             //ConsumerToBusiness.c2bpaymentspost();
-           //var securitycred = RSAClass.loadsslx509(MpesaFactory.LipaMpesaOnlinePassKey());
+           //var securitycred = RSAClass.loadsslx509(MpesaRepository.LipaMpesaOnlinePassKey());
            //BusinessToConsumer b2c = new BusinessToConsumer("testapi","BusinessPayment","1000","600438","254708374149","work", "http://b1fcbd51.ngrok.io/api/Register", "http://b1fcbd51.ngrok.io/api/Register", "work");
-           //BusinessToConsumer.PostPayment(new MpesaFactory(), b2c);
+           //BusinessToConsumer.PostPayment(new MpesaRepository(), b2c);
            // RSAClass.loadsslx509("derobuts23");
         }
         // GET: api/Register/5

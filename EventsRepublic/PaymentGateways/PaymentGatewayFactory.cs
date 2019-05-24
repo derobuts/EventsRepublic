@@ -15,7 +15,7 @@ namespace EventsRepublic.Models.Mpesa
             switch (method)
             {
                 case PaymentMethod.LipaNaMpesaOnline:
-                    gateway = new LipaNaMpesaOnline();
+                   // gateway = new LipaNaMpesaOnline();
                     break;
                 case PaymentMethod.BusinessToConsumer:
                     gateway = new BusinessToConsumer();

@@ -3,11 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EventsRepublic.Models;
 
 namespace EventsRepublic.InterFace
 {
-    public interface IMpesaHttp
+    public interface IMpesa
     {
-        Task<Tuple<bool, string, string>> SendAsync(string url, Dictionary<string, string> headers, HttpMethod httpmethod, params string[] value);
+         void LipaMpesaOnlineStk(LipaMpesaStkPayload lipaMpesaStkPayload);
     }
 }

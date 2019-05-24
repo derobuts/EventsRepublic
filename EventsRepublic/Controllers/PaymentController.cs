@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Transactions;
 using Dapper;
@@ -18,51 +19,44 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace EventsRepublic.Controllers
-{  
+{
+    [Route("api/Payment")]
     public class PaymentController : Controller
     {
-        private readonly IMpesaHttp _mpesahttp;
-        public PaymentController(IMpesaHttp mpesaHttp)
+        private readonly IMpesa _mpesa;
+        public PaymentController(IMpesa mpesa)
         {
-            _mpesahttp = mpesaHttp;
+            _mpesa = mpesa;
         }
         // GET: api/Payment
+       
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+
+            return "g";
         }
 
-        // GET: api/Payment/5
-        [HttpGet("api/getpayments")]
-        public string Get1(int id)
-        {
-            return "value";
-        }
-        [HttpGet("api/myvalues")]
-        public string GetO(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Payment
-        [HttpPost("api/PostPayment")]
-        public async Task<ActionResult> Post([FromBody]object value)
-        {
-            
-            object User;
-            HttpContext.Items.TryGetValue("principaluser", out User);
-            var Userinfo = (Payload)User;
-            var paymentpayload = JsonConvert.DeserializeObject<PaymentPayloadRootObject>(value.ToString());
-            //
-            OrderRespository orderRespository = new OrderRespository();
-            //var getuserorder = await orderRespository.GetUserOrder(Userinfo.UserId);
-
-            PaymentProcessor paymentProcessor = new PaymentProcessor();
-           // paymentProcessor.MakePayment((PaymentMethod)paymentpayload.PaymentPayload.Paymentmethod, getuserorder,paymentpayload.PaymentPayload);
-            return Ok();
-        }
+        /**
+                // POST: api/Payment
+                [HttpPost("api/PostPayment")]
+                public async Task<ActionResult> Post([FromBody]object value)
+                {
+                    
+                    object User;
+                    HttpContext.Items.TryGetValue("principaluser", out User);
+                    var Userinfo = (Payload)User;
+                    var paymentpayload = JsonConvert.DeserializeObject<PaymentPayloadRootObject>(value.ToString());
+                    //
+                    OrderRespository orderRespository = new OrderRespository();
+                    //var getuserorder = await orderRespository.GetUserOrder(Userinfo.UserId);
+                    
+                    PaymentProcessor paymentProcessor = new PaymentProcessor();
+                   // paymentProcessor.MakePayment((PaymentMethod)paymentpayload.PaymentPayload.Paymentmethod, getuserorder,paymentpayload.PaymentPayload);
+                    return Ok();
+                }**/
         //
+        /**
         [HttpPost("api/LipaMpesaValidationback")]
         public string c2bvalidation([FromBody]object value)
         {
@@ -166,13 +160,11 @@ namespace EventsRepublic.Controllers
                 throw;
             }           
             
-        }
-
-        [HttpPost]
-        [ActionName("ConsumerToBusinessCallback")]
-        public void C2BCallback([FromBody]object value)
+        }**/
+        [HttpPost]      
+        public async Task LipaNaMpesaOnlineAsync([FromBody]LipaMpesaStkPayload value)
         {
-
+            _mpesa.LipaMpesaOnlineStk(value);
         }
 
         // DELETE: api/ApiWithActions/5

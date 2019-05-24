@@ -37,8 +37,8 @@ namespace EventsRepublic.Models.Mpesa
                 ConfirmationURL = "http://59f015e4.ngrok.io/api/LipaMpesaValidationback",
                 ValidationURL = "http://59f015e4.ngrok.io/api/LipaMpesaValidationback",
             };
-            var mpesasd = new MpesaFactory();       
-            await mpesasd.TryPostToMpesa("https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl",registerurl);
+            
+            //await mpesasd.TryPostToMpesa("https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl",registerurl);
         }
 
         public static void c2bpaymentspost()
@@ -57,8 +57,8 @@ namespace EventsRepublic.Models.Mpesa
                 BillRefNumber = "72087",
                 ShortCode = "603083"
             };
-            var mpesasd = new MpesaFactory();
-            await  mpesasd.TryPostToMpesa("https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate",c2b);
+           // var mpesasd = new MpesaRepository();
+           // await  mpesasd.TryPostToMpesa("https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate",c2b);
         }
     }
     public class regurl

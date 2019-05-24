@@ -38,12 +38,9 @@ namespace EventsRepublic.Models.Mpesa
                 ResultURL = "",
                 Occassion = "payout"
             };
-            MpesaFactory mpesaFactory = new MpesaFactory();
-            var response = await mpesaFactory.TryPostToMpesa(url, b2c);
-            if (response.Item1)
-            {
-
-            }
+            //MpesaRepository mpesaFactory = new MpesaRepository();
+            //var response = await mpesaFactory.TryPostToMpesa(url, b2c);
+           
         }
     }
 }
