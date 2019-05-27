@@ -12,9 +12,9 @@ namespace EventsRepublic.Models.Mpesa
         public void MakePayment(PaymentMethod method, Order product,PaymentPayload paymentpayload)
         {
             PaymentGatewayFactory factory = new PaymentGatewayFactory();
-            this.gateway = factory.CreatePaymentGateway(method);
+           // this.gateway = factory.CreatePaymentGateway(method);
 
-            this.gateway.MakePayment(product,paymentpayload);
+            //this.gateway.MakePayment(product,paymentpayload);
         }
     }
 }

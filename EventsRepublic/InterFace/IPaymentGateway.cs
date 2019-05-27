@@ -8,7 +8,7 @@ namespace EventsRepublic.InterFace
 {
    public interface IPaymentGateway
     {
-        void MakePayment(Order value,PaymentPayload paymentpayload);
+        void MakePayment(T paymentpayload);
     }
 
     public class PaymentPayload

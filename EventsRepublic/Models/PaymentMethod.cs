@@ -7,9 +7,7 @@ namespace EventsRepublic.Models
 {
    public enum PaymentMethod
     {
-       LipaNaMpesaOnline,
-       BusinessToConsumer,
-       BusinessToBusiness,
+       SafaricomMpesa,
        CardPayment,
        AirtelMoney
     }

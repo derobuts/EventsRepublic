@@ -42,6 +42,11 @@ namespace EventsRepublic.Models.Mpesa
             //var response = await mpesaFactory.TryPostToMpesa(url, b2c);
            
         }
+
+        public void MakePayment(T paymentpayload)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

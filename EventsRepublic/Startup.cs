@@ -74,7 +74,7 @@ namespace EventsRepublic
             }).AddJwtBearer(options => {
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuer = true,
+                    ValidateIssuer = true,         
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,

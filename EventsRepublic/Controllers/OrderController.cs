@@ -71,14 +71,14 @@ namespace EventsRepublic.Controllers
             var _orderconfirm = JsonConvert.DeserializeObject<OrderToPay>(value.ToString());
              //var resultcode = confirmorder.ConfirmOrder(_orderconfirm.orderid, _orderconfirm.amount,_orderconfirm.eventid);           
         }
-        [HttpGet()]
-        public async Task<IActionResult>UserOrder(int orderid)
+        [HttpGet("{id}", Name = "Getordersummsary")]
+        public async Task<IActionResult>GetOrdersummary(int id)
         {
             if (ModelState.IsValid)
             {
                     var currentuserid = User.Identity.GetUserId<int>();
-                    var Ordersummary = await _orderRepository.GetUserOrder(orderid,currentuserid);
-                    Ordersummary.Reserveditems = await _orderRepository.GetItemsinOrder(orderid);
+                    var Ordersummary = await _orderRepository.GetUserOrder(id,currentuserid);
+                    Ordersummary.Reserveditems = await _orderRepository.GetItemsinOrder(id);
                     return Ok(Ordersummary);
             }    
             return NotFound();

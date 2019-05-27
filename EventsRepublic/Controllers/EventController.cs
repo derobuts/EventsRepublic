@@ -57,17 +57,13 @@ namespace EventsRepublic.Controllers
         //
         // POST: api/Event
         [HttpPost("api/createevent")]
-        public async Task Post([FromBody]object value)
+        public async Task Post([FromBody]Event value)
         {
             try
             {
-                object User;
-                HttpContext.Items.TryGetValue("principaluser", out User);
-                var Userinfo = (Payload)User;
-                var eventz = JsonConvert.DeserializeObject<Event>(value.ToString());
-                eventz.user_id = Userinfo.UserId;
+                value.user_id = 1;//temporary
                 var eventrespository = new EventRespositoryv2();
-                eventrespository.AddEvent(eventz);
+                eventrespository.AddEvent(value);
             }
             catch (Exception ex)
             {

@@ -8,14 +8,14 @@ namespace EventsRepublic.Models.Mpesa
 {
     public class PaymentGatewayFactory
     {
+        /**
         public virtual IPaymentGateway CreatePaymentGateway(PaymentMethod method)
         {
             IPaymentGateway gateway = null;
-
             switch (method)
             {
-                case PaymentMethod.LipaNaMpesaOnline:
-                   // gateway = new LipaNaMpesaOnline();
+                case PaymentMethod.SafaricomMpesa:
+                    // gateway = new MpesaRepository();
                     break;
                 case PaymentMethod.BusinessToConsumer:
                     gateway = new BusinessToConsumer();
@@ -23,5 +23,6 @@ namespace EventsRepublic.Models.Mpesa
             }
             return gateway;
         }
+    **/
     }
 }

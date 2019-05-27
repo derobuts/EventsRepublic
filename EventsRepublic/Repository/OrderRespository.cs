@@ -140,6 +140,7 @@ namespace EventsRepublic.Repository
                     }
                      );
         }
+
         public async Task<IEnumerable<LatestOrdersBought>>GetLatestOrders()
         {
            return await WithConnection(
