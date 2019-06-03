@@ -24,11 +24,11 @@ namespace EventsRepublic.Controllers
         }
 
         [HttpGet("api/recurringticketgroups")]
-        public async Task<IActionResult> GetReccurenceTickets(Guid eventid, DateTime recurrenceKey)
+        public async Task<IActionResult> GetReccurenceTickets(int eventid, DateTime recurrenceKey)
         {
             var ticketRepository = new TicketRespository();
-            var EventTicketClasses = await ticketRepository.GetEventRecurringTicketClasses(eventid, recurrenceKey.ToUniversalTime());
-            return Ok(JsonConvert.SerializeObject(EventTicketClasses));
+            //var EventTicketClasses = await ticketRepository.GetEventRecurringTicketClasses(eventid, recurrenceKey.ToUniversalTime());
+            return Ok();
         }
 
         [HttpGet("{id}", Name = "Geteventtickclasses")]

@@ -12,7 +12,7 @@ namespace EventsRepublic.InterFace
     {
         Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> ListAllAsync();
-        Task<int> CreatOrder(int eventid, int userid, List<TicketsToReserve> ticketsToReserve, bool recurring, int noofticketsinorder, DateTime orderstartdate, DateTime orderenddate);
+        Task<OrderSummary> CreatOrder(int eventid, int userid, List<TicketsToReserve> ticketsToReserve, bool recurring, int noofticketsinorder, DateTime orderstartdate, DateTime orderenddate);
         Task<OrderSummary> GetUserOrder(int orderid,int userid);
         Task<IEnumerable<OrderItem>> GetItemsinOrder(int orderid);
     }

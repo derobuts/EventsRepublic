@@ -10,6 +10,6 @@ namespace EventsRepublic.InterFace
    public interface IticketRepository
     {
         Task<IEnumerable<TicketClassSubinfo>> GeteventTicketClass(Guid eventid);
-        Task<IEnumerable<TicketClassSubinfo>> GetEventRecurringTicketClasses(Guid eventid, DateTime recurrencekey);
+       // Task<IEnumerable<TicketClassSubinfo>> GetEventRecurringTicketClasses(int eventid, DateTime recurrencekey,int ticketclassid);
     }
 }

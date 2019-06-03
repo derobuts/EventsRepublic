@@ -61,7 +61,7 @@ namespace EventsRepublic.Controllers
         {
             try
             {
-                value.user_id = 1;//temporary
+                //value.user_id = 1;//temporary
                 var eventrespository = new EventRespositoryv2();
                 eventrespository.AddEvent(value);
             }

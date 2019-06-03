@@ -52,8 +52,8 @@ namespace EventsRepublic.Controllers
                     {
                         return NotFound();
                     }                          
-                    int Orderid = await _orderRepository.CreatOrder(ordertoBeReserved.Eventid, appUser.Id, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
-                    return Ok(new {token = _jwtTokenService.CreateToken(appUser),orderid = Orderid});
+                    var Orderreserved = await _orderRepository.CreatOrder(ordertoBeReserved.Eventid, appUser.Id, ordertoBeReserved.TicketsToReserve, ordertoBeReserved.Recurring, ordertoBeReserved.NoofTicketsInOrder, ordertoBeReserved.OrderStartDate.ToUniversalTime(), ordertoBeReserved.OrderEndDate.ToUniversalTime());
+                    return Ok(new {token = _jwtTokenService.CreateToken(appUser),order = Orderreserved });
                 }
                 catch (Exception ex)
                 {

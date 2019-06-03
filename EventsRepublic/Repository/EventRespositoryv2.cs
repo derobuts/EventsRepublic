@@ -29,14 +29,16 @@ namespace EventsRepublic.Repository
                     );
                 return Event.FirstOrDefault();
             });
+            Eventinfo.ticketClasses = await new TicketRespository().GeteventTicketClass(eventid);
             if (Eventinfo.Recurring)
             {             
                 var recurrence = await GetCronstring(Eventinfo.IntId);
                 Eventinfo.EventRecurrences = recurrence;
-                Eventinfo.EventRecurrences.RecurrenceDates = new ShedulerRepository().GetNextEventOcurrences(recurrence.Cron_string);
+                Eventinfo.EventRecurrences.RecurrenceDates = new ShedulerRepository().GetNextEventOcurrences("5 4,5,6 * * *");
                 // Eventinfo.EventRecurrences. = new ShedulerRepository().GetNextEventOcurrences(recurrence.Recurrencestring);
                 return Eventinfo;
             }
+            
             return Eventinfo;
         }
 
@@ -110,7 +112,7 @@ namespace EventsRepublic.Repository
                 return Results;
             });
         }
-
+        //derobutsdutd
         public async Task<IEnumerable<EventSubinfo>> PopularNearby(decimal latitude, decimal longitude)
         {
             return await WithConnection(async c =>
@@ -118,7 +120,7 @@ namespace EventsRepublic.Repository
                 var args = new DynamicParameters();
                 args.Add("@lat", latitude, dbType: DbType.Decimal);
                 args.Add("@long", longitude, dbType: DbType.Decimal);
-                var Results = await c.QueryAsync<EventSubinfo>("GetPopularEventsNearby2"
+                var Results = await c.QueryAsync<EventSubinfo>("GetPopularEventsNearby"
                     , args,
                     commandType: CommandType.StoredProcedure
                     );
@@ -126,7 +128,7 @@ namespace EventsRepublic.Repository
                 return Results;
             });
         }
-
+        //
         public async Task<IEnumerable<T>> GeteventByName<T>(string searchword)
         {
             return await WithConnection(async c =>
@@ -151,33 +153,27 @@ namespace EventsRepublic.Repository
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<Task> tocomplete = new List<Task>();
-                    List<Task> ticketclasses = new List<Task>();
-                    int Eventid;
-                    if (!eventz.venueispresent)
-                    {
-                        //add venue and get id 
-                        VenueRepository venueRepository = new VenueRepository();
-                        eventz.venueid = await venueRepository.AddVenue2(eventz.venue);
-                    }
-                    else
-                    {
-                        eventz.venueid = eventz.venue.id;
-                    }
-
+                    //List<Task> tocomplete = new List<Task>();
+                    //List<Task> ticketclasses = new List<Task>();
+                    int Eventid;               
                     Eventid = await WithConnection(async c =>
                     {
                         var sqlparams = new DynamicParameters();
-                        sqlparams.Add("@userid", eventz.user_id, DbType.Int32);
+                        sqlparams.Add("@userid",5, DbType.Int32);
                         sqlparams.Add("@name", eventz.name, DbType.String);
                         sqlparams.Add("@categoryid", eventz.category, DbType.Int32);
                         sqlparams.Add("@visibility", eventz.visibility, DbType.Int32);
                         sqlparams.Add("@photo", eventz.photo, DbType.String);
                         sqlparams.Add("@description", eventz.description, DbType.String);
-                        sqlparams.Add("@venueid", eventz.venueid, DbType.Int32);
                         sqlparams.Add("Startdate", eventz.startdate,DbType.DateTime);
                         sqlparams.Add("Enddate", eventz.enddate, DbType.DateTime);
                         sqlparams.Add("@recurring", eventz.recurring, DbType.Int32);
+                        sqlparams.Add("@latitude", eventz.latitude, DbType.Decimal);
+                        sqlparams.Add("@longitude",eventz.longitude, DbType.Decimal);
+                        sqlparams.Add("@city", eventz.city, DbType.String);
+                        sqlparams.Add("@country", eventz.country, DbType.String);
+                        sqlparams.Add("@timezone", eventz.timezone, DbType.String);
+                        sqlparams.Add("@placeaddress", eventz.placeaddress, DbType.String);
                         sqlparams.Add("@output", DbType.Int32, direction: ParameterDirection.Output);
                         await c.ExecuteAsync("AddEvent",
                         sqlparams,
@@ -189,25 +185,23 @@ namespace EventsRepublic.Repository
                     {
                         foreach (var item in eventz.recurringpatterns)
                         {
-                            tocomplete.Add(AddEventRecurrencePattern(Eventid, item.recurringstring, item.intervallengthmins, item.Endtime,item.parsedcron));
-                            //await AddEventRecurrencePattern(Eventid,item.recurringstring,item.intervallengthmins,item.Endtime);                           
+                            //tocomplete.Add(AddEventRecurrencePattern(Eventid, item.recurringstring, item.intervallengthmins, item.Endtime,item.parsedcron));
+                            await AddEventRecurrencePattern(Eventid, item.recurringstring, item.intervallengthmins, item.Endtime, item.parsedcron);
                         }
                         foreach (var item in eventz.ticketClasses)
-                        {
-                           tocomplete.Add(new TicketRespository().AddRecurringTicketClass(Eventid, item));
-                          // await new TicketRespository().AddRecurringTicketClass(Eventid, item);
+                        {                          
+                             await new TicketRespository().AddRecurringTicketClass(Eventid, item);
                         }
                     }
                     else
                     {
                         foreach (var ticketclass in eventz.ticketClasses)
                         {
-                           // tocomplete.Add(new TicketRespository().AddTicketClass(Eventid, ticketclass));
-                          await new TicketRespository().AddTicketClass(Eventid, ticketclass);
+                            // tocomplete.Add(new TicketRespository().AddTicketClass(Eventid, ticketclass));
+                            await new TicketRespository().AddTicketClass(Eventid, ticketclass);
                         }
-                    }                   
-                    
-                    await Task.WhenAll(tocomplete);
+                    }
+                    //await Task.WhenAll(tocomplete);
                     scope.Complete();
                 }
              
@@ -249,6 +243,7 @@ namespace EventsRepublic.Repository
             public string Photo { get; set; }
             public bool Recurring { get; set; }
             public Recurrence EventRecurrences { get; set; }
+            public IEnumerable<TicketClassSubinfo> ticketClasses { get; set; }
             public IEnumerable<DateTime> RecurrenceDates { get; set; }
             public string PlaceAddress { get; set; }
             public string Timezone { get; set; }

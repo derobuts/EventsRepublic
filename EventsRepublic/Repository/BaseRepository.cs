@@ -25,7 +25,7 @@ namespace EventsRepublic.Repository
             {
                 using (var connection = new SqlConnection(_ConnectionString))
                 {
-                    await connection.OpenAsync(); // Asynchronously open a connection to the database
+                   // await connection.OpenAsync(); // Asynchronously open a connection to the database
                     return await getData(connection); // Asynchronously execute getData, which has been passed in as a Func<IDBConnection, Task<T>>
                 }
             }
@@ -45,7 +45,7 @@ namespace EventsRepublic.Repository
             {
                 using (var connection = new SqlConnection(_ConnectionString))
                 {
-                    await connection.OpenAsync(); // Asynchronously open a connection to the database
+                    //await connection.OpenAsync(); // Asynchronously open a connection to the database
                     await getData(connection); // Asynchronously execute getData, which has been passed in as a Func<IDBConnection, Task<T>>
                 }
             }

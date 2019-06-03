@@ -24,9 +24,9 @@ namespace EventsRepublic.Repository
                 return TicketClass;
             });
         }
-        /** **/
+        /** 
        
-        public async Task<IEnumerable<TicketClassSubinfo>> GetEventRecurringTicketClasses(Guid eventid, DateTime recurrencekey)
+        public async Task<IEnumerable<TicketClassSubinfo>>GetEventRecurringTicketClasses(int eventid, DateTime recurrencekey)
         {
             await CheckIfRecurrenceDateExists(recurrencekey, eventid);
             return await WithConnection(async c =>
@@ -41,20 +41,21 @@ namespace EventsRepublic.Repository
                 return TicketClass;
             });
         }
-
-        public async Task CheckIfRecurrenceDateExists(DateTime date, Guid eventid)
+    **/
+        public async Task CheckIfRecurrenceDateExists(DateTime date, int eventid,int ticketclassid)
         {
             var ticketid = await WithConnection(async c =>
             {
-                return c.Query<int>(@"select Top 1 Id from Ticket where RecurrenceKey = @eventdate", new { @eventdate = date }).FirstOrDefault();
+                return c.Query<int>(@"select Top 1 Id from Ticket where RecurrenceKey = @eventdate and Class_Id = @classid ", new {@classid = ticketclassid, @eventdate = date }).FirstOrDefault();
             });
-            if (ticketid <= 0)
+            if (ticketid == 0)
             {
                 await WithConnection2(async c =>
                 {
                     var sqlparams = new DynamicParameters();
-                    sqlparams.Add("@eventid", eventid, DbType.Guid);
-                    sqlparams.Add("@@recurrencekey", date, DbType.DateTime);
+                    sqlparams.Add("@eventid", eventid, DbType.Int32);
+                    sqlparams.Add("@ticketclassid",ticketclassid, DbType.Int32);
+                    sqlparams.Add("@recurrencekey", date, DbType.DateTime);
                     var TicketClass = await c.QueryAsync<TicketClassSubinfo>("AddTicketsRecurrence"
                         , sqlparams,
                         commandType: CommandType.StoredProcedure
@@ -79,8 +80,7 @@ namespace EventsRepublic.Repository
                 sqlparams.Add("@startsale", ticketClass.startsale, DbType.DateTime);
                 sqlparams.Add("@endsale", ticketClass.endsale, DbType.DateTime);
                 sqlparams.Add("@feestype", ticketClass.feestype, DbType.Int32);
-                sqlparams.Add("@netprice", ticketClass.netamount, DbType.Decimal);
-                sqlparams.Add("@feecharge", ticketClass.fees, DbType.Decimal);
+              
                 sqlparams.Add("@additionalinfo", ticketClass.additionalinfo, DbType.String);
                 await c.ExecuteAsync("AddTicketClass", sqlparams, commandType: CommandType.StoredProcedure);
             }
@@ -102,8 +102,6 @@ namespace EventsRepublic.Repository
                 sqlparams.Add("@startsale", ticketClass.startsale, DbType.DateTime);
                 sqlparams.Add("@endsale", ticketClass.endsale, DbType.DateTime);
                 sqlparams.Add("@feestype", ticketClass.feestype, DbType.Int32);
-                sqlparams.Add("@netprice", ticketClass.netamount, DbType.Decimal);
-                sqlparams.Add("@feecharge", ticketClass.fees, DbType.Decimal);
                 sqlparams.Add("@additionalinfo", ticketClass.additionalinfo, DbType.String);
                 await c.ExecuteAsync("AddRecurringTicketClass", sqlparams, commandType: CommandType.StoredProcedure);
             }

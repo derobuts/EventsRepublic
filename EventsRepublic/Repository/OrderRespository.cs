@@ -23,7 +23,7 @@ namespace EventsRepublic.Repository
     public class OrderRespository  : BaseRepository,IOrderRepository
     {       
         /** **/
-        public async Task<IEnumerable<OrderSummary>> GetOrderReserved(int orderid)
+        public async Task<OrderSummary> GetOrderReserved(int orderid)
         {
             return await WithConnection(async c =>
             {
@@ -33,7 +33,7 @@ namespace EventsRepublic.Repository
                 var resorder = await c.QueryAsync<OrderSummary>("GetOrderReserved",
                 sqlparams,
                 commandType: CommandType.StoredProcedure);
-                return resorder;
+                return resorder.FirstOrDefault();
             });
         }
       
@@ -61,7 +61,7 @@ namespace EventsRepublic.Repository
                                                                               }
         );      
         /** **/
-        public async Task<int> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
+        public async Task<OrderSummary> CreatOrder(int eventid,int userid, List<TicketsToReserve> ticketsToReserve,bool recurring,int noofticketsinorder,DateTime orderstartdate, DateTime orderenddate)
         {
            // List<Task> ticketclasstasks = new List<Task>();
             DateTime Expirytime = DateTime.Now.AddMinutes(15).ToUniversalTime();
@@ -84,7 +84,10 @@ namespace EventsRepublic.Repository
                     await AddTicketToOrder(item,Expirytime,orderid, eventid);                 
                 }
             }
-            return orderid;
+            await UpdateOrderPriceandTicketsinOrder(orderid);
+            var userorder = await GetUserOrder(orderid,userid);
+            userorder.Reserveditems = await GetItemsinOrder(orderid);
+            return userorder;
         }
         public async Task<IEnumerable<OrderItem>> GetItemsinOrder(int orderid) => await WithConnection(async c =>
         {
@@ -97,6 +100,20 @@ namespace EventsRepublic.Repository
                                       inner join TicketClass Tc on Tc.TicketId = quantity.Class_Id", new { @orderid = orderid });
         }
        );
+        public async Task UpdateOrderPriceandTicketsinOrder(int orderid) => await WithConnection2(async c =>
+        {
+            const string Sql = @"UPDATE Orders 
+             SET Amount = COALESCE(Orderprice.tcprice,0),NoOfTicketsReserved = COALESCE(Orderprice.ticketsquantity,0) 
+FROM(
+select sum(tc.Price)as tcprice,count(t.id)as ticketsquantity
+from Ticket t 
+inner join TicketClass tc on tc.TicketId = t.Class_Id
+where t.Order_Id = @orderid
+)AS Orderprice
+where OrdersId = @orderid";
+            await c.ExecuteAsync(Sql, new { @orderid = orderid });
+        }
+     );
         /** **/
         public async Task AddTicketToOrder(TicketsToReserve ticketsToReserve,DateTime expiryttime,int orderid,int eventid)
         {
@@ -109,12 +126,14 @@ namespace EventsRepublic.Repository
                    sqlparams.Add("@ticketquantity", ticketsToReserve.ticketsselected, DbType.Int32);
                    sqlparams.Add("@orderid",orderid, DbType.Int32);
                    sqlparams.Add("@expirytime", expiryttime, DbType.DateTime);
-                   await c.ExecuteAsync("AddTicketToOrderv32", sqlparams, commandType: CommandType.StoredProcedure);
+                   await c.ExecuteAsync("AddTicketToOrder", sqlparams, commandType: CommandType.StoredProcedure);
                }
               );
         }
         public async Task AddRecurringTicketToOrder(TicketsToReserve ticketsToReserve, DateTime expiryttime, int orderid, int eventid,DateTime recurrencekey)
         {
+            TicketRespository ticketRespository = new TicketRespository();
+            await ticketRespository.CheckIfRecurrenceDateExists(recurrencekey, eventid,ticketsToReserve.ticketclassid);
             await WithConnection2(
                async c =>
                {
